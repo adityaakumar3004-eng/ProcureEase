@@ -1,5 +1,12 @@
 const dotenv = require("dotenv");
-dotenv.config();
+const path = require("path");
+
+dotenv.config({
+  path: path.join(__dirname, ".env"),
+});
+
+console.log("Loaded .env from:", path.join(__dirname, ".env"));
+console.log(process.env);
 
 require("./config/db"); // Connect to MySQL
 
