@@ -1,4 +1,3 @@
-console.log("✅ PurchaseOrderRoutes Loaded");
 const express = require("express");
 
 const router = express.Router();

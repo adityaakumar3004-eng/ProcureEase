@@ -36,6 +36,16 @@ const getAllProducts = async () => {
     return rows;
 };
 
+// Get Product By ID
+const getProductById = async (id) => {
+    const [rows] = await db.execute(
+        "SELECT * FROM products WHERE id = ?",
+        [id]
+    );
+
+    return rows;
+};
+
 // Update Product
 const updateProduct = async (
     id,
@@ -48,13 +58,23 @@ const updateProduct = async (
     const [result] = await db.execute(
         `UPDATE products
         SET
-            name=?,
-            description=?,
-            price=?,
-            stock=?,
-            vendor_id=?
-        WHERE id=?`,
+            name = ?,
+            description = ?,
+            price = ?,
+            stock = ?,
+            vendor_id = ?
+        WHERE id = ?`,
         [name, description, price, stock, vendor_id, id]
+    );
+
+    return result;
+};
+
+// Update Product Stock
+const updateProductStock = async (id, stock) => {
+    const [result] = await db.execute(
+        "UPDATE products SET stock = ? WHERE id = ?",
+        [stock, id]
     );
 
     return result;
@@ -63,7 +83,7 @@ const updateProduct = async (
 // Delete Product
 const deleteProduct = async (id) => {
     const [result] = await db.execute(
-        "DELETE FROM products WHERE id=?",
+        "DELETE FROM products WHERE id = ?",
         [id]
     );
 
@@ -73,6 +93,8 @@ const deleteProduct = async (id) => {
 module.exports = {
     createProduct,
     getAllProducts,
+    getProductById,
     updateProduct,
-    deleteProduct
+    updateProductStock,
+    deleteProduct,
 };
