@@ -71,8 +71,12 @@ const updateProduct = async (
 };
 
 // Update Product Stock
-const updateProductStock = async (id, stock) => {
-    const [result] = await db.execute(
+const updateProductStock = async (
+    id,
+    stock,
+    connection = db
+) => {
+    const [result] = await connection.execute(
         "UPDATE products SET stock = ? WHERE id = ?",
         [stock, id]
     );
