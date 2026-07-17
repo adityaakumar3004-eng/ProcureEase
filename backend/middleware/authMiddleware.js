@@ -1,32 +1,37 @@
 const jwt = require("jsonwebtoken");
 
-const authMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
+
+    // Get Authorization header
+    const authHeader = req.header("Authorization");
+
+    // Check if header exists
+    if (!authHeader) {
+        return res.status(401).json({
+            message: "Access denied. No token provided."
+        });
+    }
+
+    // Check if header starts with Bearer
+    if (!authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+            message: "Invalid token format."
+        });
+    }
+
+    // Extract only the JWT
+    const token = authHeader.split(" ")[1];
+
     try {
-        // Get token from request header
-        const token = req.header("Authorization");
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-        if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: "Access denied. No token provided."
-            });
-        }
+        req.user = verified;
 
-        // Verify JWT token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Store user data in request object
-        req.user = decoded;
-
-        // Move to next middleware/controller
         next();
 
-    } catch (error) {
-        return res.status(401).json({
-            success: false,
-            message: "Invalid or expired token."
+    } catch (err) {
+        res.status(400).json({
+            message: "Invalid token."
         });
     }
 };
-
-module.exports = authMiddleware;

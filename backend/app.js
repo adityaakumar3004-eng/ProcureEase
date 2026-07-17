@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/AuthRoutes");
 const vendorRoutes = require("./routes/VendorRoutes");
+const productRoutes = require("./routes/ProductRoutes");
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 //Auth Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vendors", vendorRoutes);
+app.use("/api/products", productRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
