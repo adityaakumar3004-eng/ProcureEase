@@ -37,8 +37,11 @@ const getAllProducts = async () => {
 };
 
 // Get Product By ID
-const getProductById = async (id) => {
-    const [rows] = await db.execute(
+const getProductById = async (
+    id,
+    connection = db
+) => {
+    const [rows] = await connection.execute(
         "SELECT * FROM products WHERE id = ?",
         [id]
     );

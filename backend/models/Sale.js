@@ -8,7 +8,7 @@ const createSale = async (
     total_amount,
     connection = db
 ) => {
-    const [result] = await db.execute(
+    const [result] = await connection.execute(
         `INSERT INTO sales
         (product_id, quantity, price, total_amount)
         VALUES (?, ?, ?, ?)`,

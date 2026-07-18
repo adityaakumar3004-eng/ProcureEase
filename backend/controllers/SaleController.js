@@ -12,10 +12,11 @@ const createSale = async (req, res) => {
         const { product_id, quantity } = req.body;
 
         // Find Product
-        const products = await Product.getProductById(product_id);
-
+        const products = await Product.getProductById(
+        product_id,
+        connection
+     );
         if (products.length === 0) {
-            await connection.rollback();
             return res.status(404).json({
                 message: "Product not found",
             });
@@ -25,7 +26,6 @@ const createSale = async (req, res) => {
 
         // Check Stock
         if (product.stock < quantity) {
-            await connection.rollback();
             return res.status(400).json({
                 message: "Insufficient Stock",
             });
