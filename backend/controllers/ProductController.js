@@ -27,13 +27,34 @@ const createProduct = async (req, res) => {
 // Get All Products
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.getAllProducts();
+        const {
+                search = "",
+                vendor_id,
+                minPrice,
+                maxPrice,
+                sortBy,
+                order,
+                page = 1,
+                limit = 10
+              } = req.query;
 
+        const products = await Product.getAllProducts(
+                search,
+                vendor_id,
+                minPrice,
+                maxPrice,
+                sortBy,
+                order,
+                page,
+                limit
+);
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({
-            message: error.message,
+            message: "Error fetching products",
+            error: error.message
         });
+
     }
 };
 

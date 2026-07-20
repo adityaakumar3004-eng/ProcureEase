@@ -19,8 +19,18 @@ const createProduct = async (
 };
 
 // Get All Products
-const getAllProducts = async () => {
-    const [rows] = await db.execute(`
+const getAllProducts = async (
+    search,
+    vendor_id,
+    minPrice,
+    maxPrice,
+    sortBy,
+    order,
+    page,
+    limit
+) => {
+
+    let query = `
         SELECT
             p.id,
             p.name,
@@ -31,7 +41,54 @@ const getAllProducts = async () => {
         FROM products p
         JOIN vendors v
         ON p.vendor_id = v.id
-    `);
+        WHERE 1=1
+    `;
+
+    let values = [];
+
+    if (search) {
+        query += ` AND p.name LIKE ?`;
+        values.push(`%${search}%`);
+    }
+
+    if (vendor_id) {
+        query += ` AND p.vendor_id = ?`;
+        values.push(vendor_id);
+    }
+    if (minPrice) {
+    query += ` AND p.price >= ?`;
+    values.push(minPrice);
+    }
+    if (maxPrice) {
+    query += ` AND p.price <= ?`;
+    values.push(maxPrice);
+    }
+    const allowedSortFields = [
+    "name",
+    "price",
+    "stock"
+    ];
+    const sortField = allowedSortFields.includes(sortBy)
+    ? sortBy
+    : "name";
+    const sortOrder = order === "DESC"
+    ? "DESC"
+    : "ASC";
+
+    query += ` ORDER BY p.${sortField} ${sortOrder}`;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+
+    const offset = (pageNumber - 1) * limitNumber;
+
+    query += ` LIMIT ? OFFSET ?`;
+
+   values.push(limitNumber, offset);
+
+    console.log(query);
+
+    const [rows] = await db.query(query, values);
 
     return rows;
 };
