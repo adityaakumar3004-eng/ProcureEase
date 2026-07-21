@@ -12,14 +12,18 @@ const DashboardController = {
                  purchaseOrders,
                  sales,
                  inventoryValue,
-                 lowStockProducts
+                 lowStockProducts,
+                 recentSales,
+                 recentPurchaseOrders
                 ] = await Promise.all([
                  Dashboard.getTotalVendors(),
                  Dashboard.getTotalProducts(),
                  Dashboard.getTotalPurchaseOrders(),
                  Dashboard.getTotalSales(),
                  Dashboard.getInventoryValue(),
-                 Dashboard.getLowStockProducts()
+                 Dashboard.getLowStockProducts(),
+                 Dashboard.getRecentSales(),
+                 Dashboard.getRecentPurchaseOrders()
                 ]);
 
             return res.status(200).json({
@@ -28,7 +32,9 @@ const DashboardController = {
                 purchaseOrders: purchaseOrders.totalPurchaseOrders,
                 sales: sales.totalSales,
                 inventoryValue: Number(inventoryValue.inventoryValue),
-                lowStockProducts
+                lowStockProducts,
+                recentSales,
+                recentPurchaseOrders
             });
 
         } catch (error) {

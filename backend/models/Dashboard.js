@@ -37,16 +37,41 @@ const Dashboard = {
     `);
 
     return rows[0];
-},
+    },
 
     getLowStockProducts: async () => {
         const [rows] = await db.query(
             `SELECT id, name, stock
              FROM products
-             WHERE stock < 10`
+             WHERE stock < 10
+             ORDER BY stock ASC`
+            
         );
         return rows;
-    }
+   },
+    getRecentSales: async () => {
+        const [rows] = await db.query(
+             `SELECT *
+             FROM sales
+             ORDER BY id DESC
+             LIMIT 5`
+      );
+    return rows;
+    },
+   getRecentPurchaseOrders: async () => {
+    const [rows] = await db.query(`
+        SELECT
+            id,
+            vendor_id,
+            total_amount,
+            status,
+            created_at
+        FROM purchase_orders
+        ORDER BY id DESC
+        LIMIT 5
+    `);
+    return rows;
+    },
 
 };
 

@@ -77,6 +77,8 @@ const getAllProducts = async (
 
     query += ` ORDER BY p.${sortField} ${sortOrder}`;
 
+    const countValues = [...values];
+
     const pageNumber = Number(page);
     const limitNumber = Number(limit);
 
@@ -84,13 +86,43 @@ const getAllProducts = async (
 
     query += ` LIMIT ? OFFSET ?`;
 
-   values.push(limitNumber, offset);
+    values.push(limitNumber, offset);
 
-    console.log(query);
+    const countQuery = `
+    SELECT COUNT(*) AS total
+    FROM products p
+    WHERE 1=1
+    `;
+
+   let finalCountQuery = countQuery;
+
+   if (search) {
+    finalCountQuery += ` AND p.name LIKE ?`;
+    }
+
+    if (vendor_id) {
+    finalCountQuery += ` AND p.vendor_id = ?`;
+    }
+
+    if (minPrice) {
+    finalCountQuery += ` AND p.price >= ?`;
+    }
+
+    if (maxPrice) {
+    finalCountQuery += ` AND p.price <= ?`;
+    }
 
     const [rows] = await db.query(query, values);
 
-    return rows;
+    const [countRows] = await db.query(
+    finalCountQuery,
+    countValues
+    );
+
+    return {
+    products: rows,
+    total: countRows[0].total
+    };
 };
 
 // Get Product By ID

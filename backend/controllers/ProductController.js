@@ -38,7 +38,7 @@ const getAllProducts = async (req, res) => {
                 limit = 10
               } = req.query;
 
-        const products = await Product.getAllProducts(
+        const result = await Product.getAllProducts(
                 search,
                 vendor_id,
                 minPrice,
@@ -47,8 +47,17 @@ const getAllProducts = async (req, res) => {
                 order,
                 page,
                 limit
-);
-        res.status(200).json(products);
+              );
+       const totalPages = Math.ceil(result.total / Number(limit));
+
+             res.status(200).json({
+             success: true,
+             page: Number(page),
+             limit: Number(limit),
+             total: result.total,
+             totalPages,
+             data: result.products
+});
     } catch (error) {
         res.status(500).json({
             message: "Error fetching products",
