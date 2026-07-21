@@ -9,17 +9,38 @@ const {
 } = require("../controllers/productController");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
 
 // Create Product
-router.post("/", authMiddleware, createProduct);
+router.post(
+    "/",
+    authMiddleware,
+    authorizeRoles("admin", "manager"),
+    createProduct
+);
 
 // Get All Products
-router.get("/", authMiddleware, getAllProducts);
+router.get(
+    "/",
+    authMiddleware,
+    authorizeRoles("admin", "manager", "employee"),
+    getAllProducts
+);
 
 // Update Product
-router.put("/:id", authMiddleware, updateProduct);
+router.put(
+    "/:id",
+    authMiddleware,
+    authorizeRoles("admin", "manager"),
+    updateProduct
+);
 
 // Delete Product
-router.delete("/:id", authMiddleware, deleteProduct);
+router.delete(
+    "/:id",
+    authMiddleware,
+    authorizeRoles("admin"),
+    deleteProduct
+);
 
 module.exports = router;
