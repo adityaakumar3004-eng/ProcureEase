@@ -1,11 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+
 const authRoutes = require("./routes/AuthRoutes");
 const vendorRoutes = require("./routes/VendorRoutes");
 const productRoutes = require("./routes/ProductRoutes");
 const purchaseOrderRoutes = require("./routes/PurchaseOrderRoutes");
 const saleRoutes = require("./routes/saleRoutes");
 const dashboardRoutes = require("./routes/DashboardRoutes");
+
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -25,5 +28,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.get("/", (req, res) => {
   res.send("Welcome to ProcureEase Backend 🚀");
 });
+
+// Global Error Handler
+app.use(errorHandler);
 
 module.exports = app;

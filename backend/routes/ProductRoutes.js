@@ -11,11 +11,16 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
 
+const productValidationRules = require("../validators/productValidator");
+const validateRequest = require("../middleware/validateRequest");
+
 // Create Product
 router.post(
     "/",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    productValidationRules,
+    validateRequest,
     createProduct
 );
 
@@ -32,6 +37,8 @@ router.put(
     "/:id",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    productValidationRules,
+    validateRequest,
     updateProduct
 );
 
