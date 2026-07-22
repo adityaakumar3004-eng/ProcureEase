@@ -47,6 +47,7 @@ const fileFilter = (req, file, cb) => {
 
         return cb(new Error("Only PDF files are allowed."));
     }
+    return cb(new Error("Invalid upload field."));
 };
 
 const upload = multer({
