@@ -6,12 +6,15 @@ const createProduct = async (req, res, next) => {
     try {
         const { name, description, price, stock, vendor_id } = req.body;
 
+        const image = req.file ? req.file.filename : null;
+
         const result = await Product.createProduct(
             name,
             description,
             price,
             stock,
-            vendor_id
+            vendor_id,
+            image
         );
 
         res.status(201).json({
@@ -66,7 +69,7 @@ const getAllProducts = async (req, res, next) => {
 const updateProduct = async (req, res,next) => {
     try {
         const { id } = req.params;
-        const { name, description, price, stock, vendor_id } = req.body;
+        const { name, description, price, stock, vendor_id } = req.body; 
 
         const result = await Product.updateProduct(
             id,
@@ -74,7 +77,8 @@ const updateProduct = async (req, res,next) => {
             description,
             price,
             stock,
-            vendor_id
+            vendor_id,
+           
         );
 
         if (result.affectedRows === 0) {

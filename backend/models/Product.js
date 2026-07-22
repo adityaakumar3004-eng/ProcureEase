@@ -6,13 +6,14 @@ const createProduct = async (
     description,
     price,
     stock,
-    vendor_id
+    vendor_id,
+    image
 ) => {
     const [result] = await db.execute(
         `INSERT INTO products
-        (name, description, price, stock, vendor_id)
-        VALUES (?, ?, ?, ?, ?)`,
-        [name, description, price, stock, vendor_id]
+        (name, description, price, stock, vendor_id,image)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [name, description, price, stock, vendor_id,image]
     );
 
     return result;

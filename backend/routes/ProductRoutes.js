@@ -14,11 +14,15 @@ const authorizeRoles = require("../middleware/roleMiddleware");
 const productValidationRules = require("../validators/productValidator");
 const validateRequest = require("../middleware/validateRequest");
 
+const upload = require("../middleware/uploadMiddleware");
+
 // Create Product
+// Create Product (Temporary Debug Route)
 router.post(
     "/",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    upload.single("productImage"),
     productValidationRules,
     validateRequest,
     createProduct
