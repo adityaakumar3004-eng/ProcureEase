@@ -103,6 +103,39 @@ const updateInvoice = async (req, res, next) => {
     }
 };
 
+// Mark Invoice as Paid
+const markInvoiceAsPaid = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { payment_method, transaction_id } = req.body;
+
+        // Check if invoice exists
+        const invoice = await Invoice.getInvoiceById(id);
+
+        if (!invoice) {
+            return res.status(404).json({
+                success: false,
+                message: "Invoice not found",
+            });
+        }
+
+        await Invoice.markInvoiceAsPaid(
+            id,
+            "Paid",
+            new Date(),
+            payment_method,
+            transaction_id
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Invoice marked as paid successfully",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Delete Invoice
 const deleteInvoice = async (req, res, next) => {
     try {
@@ -129,5 +162,6 @@ module.exports = {
     getAllInvoices,
     getInvoiceById,
     updateInvoice,
+    markInvoiceAsPaid,
     deleteInvoice,
 };

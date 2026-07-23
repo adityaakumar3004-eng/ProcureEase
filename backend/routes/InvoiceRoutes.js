@@ -6,8 +6,9 @@ const {
     getAllInvoices,
     getInvoiceById,
     updateInvoice,
+    markInvoiceAsPaid,
     deleteInvoice,
-} = require("../controllers/invoiceController");
+} = require("../controllers/InvoiceController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -33,6 +34,9 @@ router.put(
     upload.single("invoice"),
     updateInvoice
 );
+
+// Mark Invoice as Paid
+router.put("/:id/pay", authMiddleware, markInvoiceAsPaid);
 
 // Delete Invoice
 router.delete("/:id", authMiddleware, deleteInvoice);

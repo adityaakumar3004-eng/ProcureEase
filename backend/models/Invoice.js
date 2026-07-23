@@ -85,6 +85,33 @@ const updateInvoice = async (
 
     return result;
 };
+// Mark Invoice as Paid
+const markInvoiceAsPaid = async (
+    id,
+    payment_status,
+    payment_date,
+    payment_method,
+    transaction_id
+) => {
+    const [result] = await db.execute(
+        `UPDATE invoices
+        SET
+            payment_status = ?,
+            payment_date = ?,
+            payment_method = ?,
+            transaction_id = ?
+        WHERE id = ?`,
+        [
+            payment_status,
+            payment_date,
+            payment_method,
+            transaction_id,
+            id,
+        ]
+    );
+
+    return result;
+};
 
 // Delete Invoice
 const deleteInvoice = async (id) => {
@@ -101,5 +128,6 @@ module.exports = {
     getAllInvoices,
     getInvoiceById,
     updateInvoice,
+    markInvoiceAsPaid,
     deleteInvoice,
 };
