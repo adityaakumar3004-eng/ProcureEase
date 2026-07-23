@@ -1,7 +1,8 @@
 const PurchaseOrder = require("../models/PurchaseOrder");
+const Notification = require("../models/Notification");
 
 // Create Purchase Order
-const createPurchaseOrder = async (req, res) => {
+const createPurchaseOrder = async (req, res, next) => {
     try {
         const { vendor_id, items } = req.body;
 
@@ -16,28 +17,24 @@ const createPurchaseOrder = async (req, res) => {
             totalAmount: order.totalAmount,
             status: order.status,
         });
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+    }  catch (error) {
+        next(error);
     }
 };
 
 // Get All Purchase Orders
-const getAllPurchaseOrders = async (req, res) => {
+const getAllPurchaseOrders = async (req, res, next) => {
     try {
         const orders = await PurchaseOrder.getAllPurchaseOrders();
 
         res.status(200).json(orders);
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+    }  catch (error) {
+        next(error);
     }
 };
 
 // Get Purchase Order By ID
-const getPurchaseOrderById = async (req, res) => {
+const getPurchaseOrderById = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -50,15 +47,13 @@ const getPurchaseOrderById = async (req, res) => {
         }
 
         res.status(200).json(order);
-    } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+    }  catch (error) {
+        next(error);
     }
 };
 
 // Update Purchase Order Status
-const updatePurchaseOrderStatus = async (req, res) => {
+const updatePurchaseOrderStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
@@ -67,20 +62,21 @@ const updatePurchaseOrderStatus = async (req, res) => {
             id,
             status
         );
+        const title = "Purchase Order Updated";
+        const message = `Purchase Order #${id} has been ${status}.`;
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                message: "Purchase Order not found",
-            });
-        }
+       await Notification.createNotificationIfNotExists(
+    "Purchase Order Updated",
+    `Purchase Order #${id} has been ${status}.`,
+    "Purchase Update"
+);
+
 
         res.status(200).json({
             message: "Purchase Order status updated successfully",
         });
     } catch (error) {
-        res.status(500).json({
-            message: error.message,
-        });
+        next(error);
     }
 };
 

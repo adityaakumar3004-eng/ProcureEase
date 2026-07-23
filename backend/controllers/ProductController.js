@@ -1,5 +1,8 @@
 const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
+const Notification = require("../models/Notification");
+
+const LOW_STOCK_LIMIT = 10;
 
 // Create Product
 const createProduct = async (req, res, next) => {
@@ -80,6 +83,16 @@ const updateProduct = async (req, res,next) => {
             vendor_id,
            
         );
+        if (stock <= LOW_STOCK_LIMIT) {
+    const title = "Low Stock Alert";
+    const message = `${name} stock is low (${stock} left).`;
+
+  await Notification.createNotificationIfNotExists(
+    "Low Stock Alert",
+    `${name} stock is low (${stock} left).`,
+    "Low Stock"
+);
+}
 
         if (result.affectedRows === 0) {
     return next(new AppError("Product not found", 404));

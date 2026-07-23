@@ -1,5 +1,6 @@
 const Invoice = require("../models/Invoice");
 const AppError = require("../utils/AppError");
+const Notification = require("../models/Notification");
 
 // Create Invoice
 const createInvoice = async (req, res, next) => {
@@ -20,6 +21,16 @@ const createInvoice = async (req, res, next) => {
             invoice_date,
             status
         );
+        if (status !== "Paid") {
+    const title = "Payment Due";
+    const message = `Invoice ${invoice_number} payment is pending.`;
+
+await Notification.createNotificationIfNotExists(
+    "Payment Due",
+    `Invoice ${invoice_number} payment is pending.`,
+    "Payment Due"
+);
+}
 
         res.status(201).json({
             success: true,

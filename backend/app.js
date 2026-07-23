@@ -11,6 +11,7 @@ const saleRoutes = require("./routes/SaleRoutes");
 const dashboardRoutes = require("./routes/DashboardRoutes");
 const uploadRoutes = require("./routes/UploadRoutes");
 const invoiceRoutes = require("./routes/InvoiceRoutes");
+const notificationRoutes = require("./routes/NotificationRoutes");
 
 const errorHandler = require("./middleware/errorHandler");
 
@@ -33,6 +34,7 @@ app.use("/api/sales", saleRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
