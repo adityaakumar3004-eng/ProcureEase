@@ -72,6 +72,61 @@ const Dashboard = {
     `);
     return rows;
     },
+    getMonthlySales: async () => {
+     const [rows] = await db.query(`
+        SELECT
+            MONTH(created_at) AS monthNumber,
+            MONTHNAME(created_at) AS month,
+            COALESCE(SUM(total_amount), 0) AS sales
+            FROM sales
+            GROUP BY MONTH(created_at), MONTHNAME(created_at)
+            ORDER BY monthNumber
+        `);
+
+        return rows;
+    },
+    getPurchaseTrends: async () => {
+    const [rows] = await db.query(`
+         SELECT
+            MONTH(created_at) AS monthNumber,
+            MONTHNAME(created_at) AS month,
+            COUNT(*) AS purchases
+            FROM purchase_orders
+            GROUP BY MONTH(created_at), MONTHNAME(created_at)
+            ORDER BY monthNumber
+        `);
+
+        return rows;
+    },
+    getTopProducts: async () => {
+    const [rows] = await db.query(`
+         SELECT
+            p.name AS product,
+            COALESCE(SUM(s.quantity), 0) AS quantity
+            FROM sales s
+            INNER JOIN products p
+            ON s.product_id = p.id
+            GROUP BY p.id, p.name
+            ORDER BY quantity DESC
+            LIMIT 5
+        `);
+
+        return rows;
+    },
+        getInventoryDistribution: async () => {
+        const [rows] = await db.query(`
+            SELECT
+                CASE
+                    WHEN stock < 10 THEN 'Low Stock'
+                    ELSE 'Healthy Stock'
+                END AS category,
+                COUNT(*) AS count
+            FROM products
+            GROUP BY category
+        `);
+
+        return rows;
+    },
 
 };
 
