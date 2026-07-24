@@ -6,7 +6,7 @@ const {
     getPurchaseReport,
     getInventoryReport,
     getVendorReport,
-} = require("../controllers/reportController");
+} = require("../controllers/ReportController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 

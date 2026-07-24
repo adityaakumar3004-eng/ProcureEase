@@ -5,7 +5,7 @@ const {
     exportProductsCSV,
     exportProductsExcel,
     exportProductsPDF,
-} = require("../controllers/exportController");
+} = require("../controllers/ExportController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 

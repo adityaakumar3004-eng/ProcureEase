@@ -7,7 +7,7 @@ const {
     getAllNotifications,
     markNotificationAsRead,
     deleteNotification,
-} = require("../controllers/notificationController");
+} = require("../controllers/NotificationController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 

@@ -6,7 +6,7 @@ const upload = require("../middleware/uploadMiddleware");
 const {
     uploadProductImage,
     uploadInvoice,
-} = require("../controllers/uploadController");
+} = require("../controllers/UploadController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 

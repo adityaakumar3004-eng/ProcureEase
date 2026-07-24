@@ -4,7 +4,7 @@ const router = express.Router();
 const {
     createSale,
     getAllSales,
-} = require("../controllers/saleController");
+} = require("../controllers/SaleController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
