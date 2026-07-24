@@ -1,7 +1,7 @@
 const Product = require("../models/Product");
-const exportToCSV = require("../utils/exportCSV");
-const exportToExcel = require("../utils/exportExcel");
-const exportToPDF = require("../utils/exportPDF");
+const exportToCSV = require("../utils/ExportCSV");
+const exportToExcel = require("../utils/ExportExcel");
+const exportToPDF = require("../utils/ExportPDF");
 
 // Export Products as CSV
 const exportProductsCSV = async (req, res, next) => {
