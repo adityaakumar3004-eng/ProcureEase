@@ -11,7 +11,7 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
 
-const productValidationRules = require("../validators/productValidator");
+const productValidationRules = require("../validators/ProductValidator");
 const validateRequest = require("../middleware/validateRequest");
 
 const upload = require("../middleware/uploadMiddleware");
