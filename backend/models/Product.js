@@ -11,9 +11,9 @@ const createProduct = async (
 ) => {
     const [result] = await db.execute(
         `INSERT INTO products
-        (name, description, price, stock, vendor_id,image)
+        (name, description, price, stock, vendor_id, image)
         VALUES (?, ?, ?, ?, ?, ?)`,
-        [name, description, price, stock, vendor_id,image]
+        [name, description, price, stock, vendor_id, image]
     );
 
     return result;
@@ -38,6 +38,8 @@ const getAllProducts = async (
             p.description,
             p.price,
             p.stock,
+            p.image,
+            p.vendor_id,
             v.name AS vendor_name
         FROM products p
         JOIN vendors v
@@ -56,25 +58,30 @@ const getAllProducts = async (
         query += ` AND p.vendor_id = ?`;
         values.push(vendor_id);
     }
+
     if (minPrice) {
-    query += ` AND p.price >= ?`;
-    values.push(minPrice);
+        query += ` AND p.price >= ?`;
+        values.push(minPrice);
     }
+
     if (maxPrice) {
-    query += ` AND p.price <= ?`;
-    values.push(maxPrice);
+        query += ` AND p.price <= ?`;
+        values.push(maxPrice);
     }
+
     const allowedSortFields = [
-    "name",
-    "price",
-    "stock"
+        "name",
+        "price",
+        "stock"
     ];
+
     const sortField = allowedSortFields.includes(sortBy)
-    ? sortBy
-    : "name";
+        ? sortBy
+        : "name";
+
     const sortOrder = order === "DESC"
-    ? "DESC"
-    : "ASC";
+        ? "DESC"
+        : "ASC";
 
     query += ` ORDER BY p.${sortField} ${sortOrder}`;
 
@@ -89,40 +96,38 @@ const getAllProducts = async (
 
     values.push(limitNumber, offset);
 
-    const countQuery = `
-    SELECT COUNT(*) AS total
-    FROM products p
-    WHERE 1=1
+    let finalCountQuery = `
+        SELECT COUNT(*) AS total
+        FROM products p
+        WHERE 1=1
     `;
 
-   let finalCountQuery = countQuery;
-
-   if (search) {
-    finalCountQuery += ` AND p.name LIKE ?`;
+    if (search) {
+        finalCountQuery += ` AND p.name LIKE ?`;
     }
 
     if (vendor_id) {
-    finalCountQuery += ` AND p.vendor_id = ?`;
+        finalCountQuery += ` AND p.vendor_id = ?`;
     }
 
     if (minPrice) {
-    finalCountQuery += ` AND p.price >= ?`;
+        finalCountQuery += ` AND p.price >= ?`;
     }
 
     if (maxPrice) {
-    finalCountQuery += ` AND p.price <= ?`;
+        finalCountQuery += ` AND p.price <= ?`;
     }
 
     const [rows] = await db.query(query, values);
 
     const [countRows] = await db.query(
-    finalCountQuery,
-    countValues
+        finalCountQuery,
+        countValues
     );
 
     return {
-    products: rows,
-    total: countRows[0].total
+        products: rows,
+        total: countRows[0].total
     };
 };
 
@@ -146,19 +151,38 @@ const updateProduct = async (
     description,
     price,
     stock,
-    vendor_id
+    vendor_id,
+    image
 ) => {
-    const [result] = await db.execute(
-        `UPDATE products
+
+    let query = `
+        UPDATE products
         SET
             name = ?,
             description = ?,
             price = ?,
             stock = ?,
             vendor_id = ?
-        WHERE id = ?`,
-        [name, description, price, stock, vendor_id, id]
-    );
+    `;
+
+    let values = [
+        name,
+        description,
+        price,
+        stock,
+        vendor_id
+    ];
+
+    if (image) {
+        query += `, image = ?`;
+        values.push(image);
+    }
+
+    query += ` WHERE id = ?`;
+
+    values.push(id);
+
+    const [result] = await db.execute(query, values);
 
     return result;
 };

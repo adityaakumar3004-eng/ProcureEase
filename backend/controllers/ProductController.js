@@ -24,55 +24,60 @@ const createProduct = async (req, res, next) => {
             message: "Product created successfully",
             productId: result.insertId,
         });
-    }catch (error) {
-    next(error);
-}
+    } catch (error) {
+        next(error);
+    }
 };
 
 // Get All Products
 const getAllProducts = async (req, res, next) => {
     try {
         const {
-                search = "",
-                vendor_id,
-                minPrice,
-                maxPrice,
-                sortBy,
-                order,
-                page = 1,
-                limit = 10
-              } = req.query;
+            search = "",
+            vendor_id,
+            minPrice,
+            maxPrice,
+            sortBy,
+            order,
+            page = 1,
+            limit = 10,
+        } = req.query;
 
         const result = await Product.getAllProducts(
-                search,
-                vendor_id,
-                minPrice,
-                maxPrice,
-                sortBy,
-                order,
-                page,
-                limit
-              );
-       const totalPages = Math.ceil(result.total / Number(limit));
+            search,
+            vendor_id,
+            minPrice,
+            maxPrice,
+            sortBy,
+            order,
+            page,
+            limit
+        );
 
-             res.status(200).json({
-             success: true,
-             page: Number(page),
-             limit: Number(limit),
-             total: result.total,
-             totalPages,
-             data: result.products
-});
+        console.log(result.products);
+
+        const totalPages = Math.ceil(result.total / Number(limit));
+
+        res.status(200).json({
+            success: true,
+            page: Number(page),
+            limit: Number(limit),
+            total: result.total,
+            totalPages,
+            data: result.products,
+        });
     } catch (error) {
-    next(error);
-}
+        next(error);
+    }
 };
 
 // Update Product
-const updateProduct = async (req, res,next) => {
+const updateProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { name, description, price, stock, vendor_id } = req.body; 
+        const { name, description, price, stock, vendor_id } = req.body;
+
+        const image = req.file ? req.file.filename : null;
 
         const result = await Product.updateProduct(
             id,
@@ -81,50 +86,48 @@ const updateProduct = async (req, res,next) => {
             price,
             stock,
             vendor_id,
-           
+            image
         );
-        if (stock <= LOW_STOCK_LIMIT) {
-    const title = "Low Stock Alert";
-    const message = `${name} stock is low (${stock} left).`;
 
-  await Notification.createNotificationIfNotExists(
-    "Low Stock Alert",
-    `${name} stock is low (${stock} left).`,
-    "Low Stock"
-);
-}
+        if (stock <= LOW_STOCK_LIMIT) {
+            await Notification.createNotificationIfNotExists(
+                "Low Stock Alert",
+                `${name} stock is low (${stock} left).`,
+                "Low Stock"
+            );
+        }
 
         if (result.affectedRows === 0) {
-    return next(new AppError("Product not found", 404));
-}
+            return next(new AppError("Product not found", 404));
+        }
 
         res.status(200).json({
             success: true,
             message: "Product updated successfully",
         });
     } catch (error) {
-    next(error);
-}
+        next(error);
+    }
 };
 
 // Delete Product
-const deleteProduct = async (req, res,next) => {
+const deleteProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
 
         const result = await Product.deleteProduct(id);
 
-    if (result.affectedRows === 0) {
-    return next(new AppError("Product not found", 404));
-}
+        if (result.affectedRows === 0) {
+            return next(new AppError("Product not found", 404));
+        }
 
         res.status(200).json({
             success: true,
             message: "Product deleted successfully",
         });
     } catch (error) {
-    next(error);
-}
+        next(error);
+    }
 };
 
 module.exports = {

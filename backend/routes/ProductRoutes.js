@@ -215,6 +215,7 @@ router.put(
     "/:id",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    upload.single("productImage"),
     productValidationRules,
     validateRequest,
     updateProduct
