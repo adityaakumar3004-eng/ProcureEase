@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const AppError = require("../utils/AppError");
 
 // Create Purchase Order
 const createPurchaseOrder = async (vendor_id, items) => {
@@ -9,30 +10,43 @@ const createPurchaseOrder = async (vendor_id, items) => {
 
         // Check Vendor
         const [vendor] = await connection.execute(
-            "SELECT * FROM vendors WHERE id = ?",
+            `
+            SELECT *
+            FROM vendors
+            WHERE id = ?
+            `,
             [vendor_id]
         );
 
         if (vendor.length === 0) {
-            throw new Error("Vendor not found");
+            throw new AppError("Vendor not found", 404);
         }
 
         let totalAmount = 0;
 
         // Validate Products & Calculate Total
         for (const item of items) {
+
             const [product] = await connection.execute(
-                "SELECT * FROM products WHERE id = ?",
+                `
+                SELECT *
+                FROM products
+                WHERE id = ?
+                `,
                 [item.product_id]
             );
 
             if (product.length === 0) {
-                throw new Error(`Product ID ${item.product_id} not found`);
+                throw new AppError(
+                    `Product ID ${item.product_id} not found`,
+                    404
+                );
             }
 
             if (product[0].stock < item.quantity) {
-                throw new Error(
-                    `${product[0].name} has only ${product[0].stock} items in stock`
+                throw new AppError(
+                    `${product[0].name} has only ${product[0].stock} items in stock`,
+                    400
                 );
             }
 
@@ -41,9 +55,11 @@ const createPurchaseOrder = async (vendor_id, items) => {
 
         // Create Purchase Order
         const [orderResult] = await connection.execute(
-            `INSERT INTO purchase_orders
+            `
+            INSERT INTO purchase_orders
             (vendor_id, total_amount, status)
-            VALUES (?, ?, ?)`,
+            VALUES (?, ?, ?)
+            `,
             [vendor_id, totalAmount, "Pending"]
         );
 
@@ -51,15 +67,22 @@ const createPurchaseOrder = async (vendor_id, items) => {
 
         // Insert Items & Reduce Stock
         for (const item of items) {
+
             const [product] = await connection.execute(
-                "SELECT * FROM products WHERE id = ?",
+                `
+                SELECT *
+                FROM products
+                WHERE id = ?
+                `,
                 [item.product_id]
             );
 
             await connection.execute(
-                `INSERT INTO purchase_order_items
+                `
+                INSERT INTO purchase_order_items
                 (purchase_order_id, product_id, price, quantity)
-                VALUES (?, ?, ?, ?)`,
+                VALUES (?, ?, ?, ?)
+                `,
                 [
                     purchaseOrderId,
                     item.product_id,
@@ -69,9 +92,11 @@ const createPurchaseOrder = async (vendor_id, items) => {
             );
 
             await connection.execute(
-                `UPDATE products
+                `
+                UPDATE products
                 SET stock = stock - ?
-                WHERE id = ?`,
+                WHERE id = ?
+                `,
                 [item.quantity, item.product_id]
             );
         }
@@ -83,17 +108,24 @@ const createPurchaseOrder = async (vendor_id, items) => {
             totalAmount,
             status: "Pending",
         };
+
     } catch (error) {
+
         await connection.rollback();
         throw error;
+
     } finally {
+
         connection.release();
+
     }
 };
 
 // Get All Purchase Orders
 const getAllPurchaseOrders = async () => {
-    const [rows] = await db.execute(`
+
+    const [rows] = await db.execute(
+        `
         SELECT
             po.id,
             v.name AS vendor_name,
@@ -103,15 +135,17 @@ const getAllPurchaseOrders = async () => {
             po.updated_at
         FROM purchase_orders po
         JOIN vendors v
-        ON po.vendor_id = v.id
+            ON po.vendor_id = v.id
         ORDER BY po.id DESC
-    `);
+        `
+    );
 
     return rows;
 };
 
 // Get Purchase Order By ID
 const getPurchaseOrderById = async (id) => {
+
     const [rows] = await db.execute(
         `
         SELECT
@@ -141,12 +175,22 @@ const getPurchaseOrderById = async (id) => {
 
 // Update Purchase Order Status
 const updatePurchaseOrderStatus = async (id, status) => {
+
     const [result] = await db.execute(
-        `UPDATE purchase_orders
+        `
+        UPDATE purchase_orders
         SET status = ?
-        WHERE id = ?`,
+        WHERE id = ?
+        `,
         [status, id]
     );
+
+    if (result.affectedRows === 0) {
+        throw new AppError(
+            "Purchase Order not found",
+            404
+        );
+    }
 
     return result;
 };

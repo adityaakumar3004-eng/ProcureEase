@@ -11,7 +11,12 @@ const {
 } = require("../controllers/InvoiceController");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
+
 const upload = require("../middleware/uploadMiddleware");
+
+const invoiceValidationRules = require("../validators/InvoiceValidator");
+const validateRequest = require("../middleware/validateRequest");
 
 /**
  * @swagger
@@ -65,7 +70,10 @@ const upload = require("../middleware/uploadMiddleware");
 router.post(
     "/",
     authMiddleware,
+    authorizeRoles("admin", "manager"),
     upload.single("invoice"),
+    invoiceValidationRules,
+    validateRequest,
     createInvoice
 );
 
@@ -82,7 +90,12 @@ router.post(
  *         description: Invoices fetched successfully
  */
 // Get All Invoices
-router.get("/", authMiddleware, getAllInvoices);
+router.get(
+    "/",
+    authMiddleware,
+    authorizeRoles("admin", "manager", "employee"),
+    getAllInvoices
+);
 
 /**
  * @swagger
@@ -106,7 +119,12 @@ router.get("/", authMiddleware, getAllInvoices);
  *         description: Invoice not found
  */
 // Get Invoice By ID
-router.get("/:id", authMiddleware, getInvoiceById);
+router.get(
+    "/:id",
+    authMiddleware,
+    authorizeRoles("admin", "manager", "employee"),
+    getInvoiceById
+);
 
 /**
  * @swagger
@@ -152,7 +170,10 @@ router.get("/:id", authMiddleware, getInvoiceById);
 router.put(
     "/:id",
     authMiddleware,
+    authorizeRoles("admin", "manager"),
     upload.single("invoice"),
+    invoiceValidationRules,
+    validateRequest,
     updateInvoice
 );
 
@@ -178,7 +199,12 @@ router.put(
  *         description: Invoice not found
  */
 // Mark Invoice as Paid
-router.put("/:id/pay", authMiddleware, markInvoiceAsPaid);
+router.put(
+    "/:id/pay",
+    authMiddleware,
+    authorizeRoles("admin", "manager"),
+    markInvoiceAsPaid
+);
 
 /**
  * @swagger
@@ -202,6 +228,11 @@ router.put("/:id/pay", authMiddleware, markInvoiceAsPaid);
  *         description: Invoice not found
  */
 // Delete Invoice
-router.delete("/:id", authMiddleware, deleteInvoice);
+router.delete(
+    "/:id",
+    authMiddleware,
+    authorizeRoles("admin"),
+    deleteInvoice
+);
 
 module.exports = router;

@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
+const AppError = require("../utils/AppError");
 
 // Register Service
 const registerUser = async (fullName, email, password, role = "manager") => {
@@ -10,7 +11,10 @@ const registerUser = async (fullName, email, password, role = "manager") => {
   const existingUser = await User.findUserByEmail(email);
 
   if (existingUser) {
-    throw new Error("Email already registered");
+    throw new AppError(
+    "Email already registered",
+    400
+       ); 
   }
 
   // Hash password
@@ -30,13 +34,19 @@ const loginUser = async (email, password) => {
   const user = await User.findUserByEmail(email);
 
   if (!user) {
-    throw new Error("Invalid Email or Password");
+    throw new AppError(
+    "Invalid Email or Password",
+    401
+     );
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new Error("Invalid Email or Password");
+    throw new AppError(
+    "Invalid Email or Password",
+    401
+      );
   }
 
   const token = jwt.sign(
@@ -56,7 +66,7 @@ const loginUser = async (email, password) => {
     token,
     user: {
       id: user.id,
-      full_name: user.full_name,
+      fullName: user.full_name,
       email: user.email,
       role: user.role,
     },

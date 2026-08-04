@@ -17,6 +17,7 @@ const invoiceRoutes = require("./routes/InvoiceRoutes");
 const notificationRoutes = require("./routes/NotificationRoutes");
 const reportRoutes = require("./routes/ReportRoutes");
 const exportRoutes = require("./routes/ExportRoutes");
+const paymentRoutes = require("./routes/PaymentRoutes");
 
 const errorHandler = require("./middleware/errorHandler");
 
@@ -42,6 +43,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/export", exportRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

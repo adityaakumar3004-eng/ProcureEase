@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
+const vendorValidationRules = require("../validators/VendorValidator");
+const validateRequest = require("../middleware/validateRequest");
+
 const VendorController = require("../controllers/VendorController");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
@@ -57,6 +60,8 @@ router.post(
     "/",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    vendorValidationRules,
+    validateRequest,
     VendorController.addVendor
 );
 
@@ -123,6 +128,8 @@ router.put(
     "/:id",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    vendorValidationRules,
+    validateRequest,
     VendorController.updateVendor
 );
 

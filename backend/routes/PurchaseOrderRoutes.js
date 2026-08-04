@@ -11,6 +11,13 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/roleMiddleware");
 
+const {
+    createPurchaseOrderValidationRules,
+    updatePurchaseOrderStatusValidationRules,
+} = require("../validators/PurchaseOrderValidator");
+
+const validateRequest = require("../middleware/validateRequest");
+
 /**
  * @swagger
  * tags:
@@ -53,12 +60,16 @@ const authorizeRoles = require("../middleware/roleMiddleware");
  *         description: Bad Request
  *       401:
  *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
 // Create Purchase Order
 router.post(
     "/",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    createPurchaseOrderValidationRules,
+    validateRequest,
     createPurchaseOrder
 );
 
@@ -75,6 +86,8 @@ router.post(
  *         description: Purchase Orders fetched successfully
  *       401:
  *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
 // Get All Purchase Orders
 router.get(
@@ -104,6 +117,10 @@ router.get(
  *         description: Purchase Order fetched successfully
  *       404:
  *         description: Purchase Order not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
 // Get Purchase Order By ID
 router.get(
@@ -143,6 +160,12 @@ router.get(
  *     responses:
  *       200:
  *         description: Purchase Order status updated successfully
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Purchase Order not found
  */
@@ -151,6 +174,8 @@ router.put(
     "/:id/status",
     authMiddleware,
     authorizeRoles("admin", "manager"),
+    updatePurchaseOrderStatusValidationRules,
+    validateRequest,
     updatePurchaseOrderStatus
 );
 

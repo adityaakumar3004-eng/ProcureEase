@@ -8,6 +8,7 @@ module.exports = (req, res, next) => {
     // Check if header exists
     if (!authHeader) {
         return res.status(401).json({
+            success: false,
             message: "Access denied. No token provided."
         });
     }
@@ -15,6 +16,7 @@ module.exports = (req, res, next) => {
     // Check if header starts with Bearer
     if (!authHeader.startsWith("Bearer ")) {
         return res.status(401).json({
+            success: false,
             message: "Invalid token format."
         });
     }
@@ -29,9 +31,11 @@ module.exports = (req, res, next) => {
 
         next();
 
-    } catch (err) {
-        res.status(400).json({
-            message: "Invalid token."
-        });
+    } 
+    catch (err) {
+    return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token."
+    });
     }
 };

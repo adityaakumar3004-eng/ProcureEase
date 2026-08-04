@@ -23,12 +23,12 @@ const AuthController = require("../controllers/AuthController");
  *           schema:
  *             type: object
  *             required:
- *               - full_name
+ *               - fullname
  *               - email
  *               - password
  *               - role
  *             properties:
- *               full_name:
+ *               fullname:
  *                 type: string
  *                 example: John Doe
  *               email:
@@ -39,7 +39,7 @@ const AuthController = require("../controllers/AuthController");
  *                 example: password123
  *               role:
  *                 type: string
- *                 example: Admin
+ *                 example: admin
  *     responses:
  *       201:
  *         description: User registered successfully

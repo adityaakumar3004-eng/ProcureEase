@@ -29,7 +29,7 @@ const getAllInvoices = async () => {
     const [rows] = await db.execute(
         `SELECT
             i.*,
-            p.id AS purchase_order_number
+            p.id AS purchase_order_id
         FROM invoices i
         JOIN purchase_orders p
             ON i.purchase_order_id = p.id
@@ -44,7 +44,7 @@ const getInvoiceById = async (id) => {
     const [rows] = await db.execute(
         `SELECT
             i.*,
-            p.id AS purchase_order_number
+            p.id AS purchase_order_id
         FROM invoices i
         JOIN purchase_orders p
             ON i.purchase_order_id = p.id

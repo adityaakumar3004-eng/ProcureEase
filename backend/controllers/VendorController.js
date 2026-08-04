@@ -1,42 +1,36 @@
 const VendorService = require("../services/VendorService");
 
 // Add Vendor
-const addVendor = async (req, res) => {
+const addVendor = async (req, res, next) => {
     try {
         const result = await VendorService.addVendor(req.body);
 
         res.status(201).json({
             success: true,
             message: "Vendor added successfully",
-            data: result
+            data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        next(error);
     }
 };
 
 // Get All Vendors
-const getVendors = async (req, res) => {
+const getVendors = async (req, res, next) => {
     try {
         const vendors = await VendorService.getVendors();
 
         res.status(200).json({
             success: true,
-            data: vendors
+            data: vendors,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        next(error);
     }
 };
 
 // Update Vendor
-const updateVendor = async (req, res) => {
+const updateVendor = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -44,18 +38,15 @@ const updateVendor = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "Vendor updated successfully"
+            message: "Vendor updated successfully",
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        next(error);
     }
 };
 
 // Delete Vendor
-const deleteVendor = async (req, res) => {
+const deleteVendor = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -63,13 +54,10 @@ const deleteVendor = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "Vendor deleted successfully"
+            message: "Vendor deleted successfully",
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        next(error);
     }
 };
 
@@ -77,5 +65,5 @@ module.exports = {
     addVendor,
     getVendors,
     updateVendor,
-    deleteVendor
+    deleteVendor,
 };

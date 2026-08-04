@@ -12,7 +12,11 @@ const createInvoice = async (req, res, next) => {
             status,
         } = req.body;
 
-        const invoice_file = req.file ? req.file.filename : null;
+        if (!req.file) {
+            return next(new AppError("Invoice file is required", 400));
+        }
+
+        const invoice_file = req.file.filename;
 
         const result = await Invoice.createInvoice(
             purchase_order_id,
@@ -21,16 +25,14 @@ const createInvoice = async (req, res, next) => {
             invoice_date,
             status
         );
-        if (status !== "Paid") {
-    const title = "Payment Due";
-    const message = `Invoice ${invoice_number} payment is pending.`;
 
-await Notification.createNotificationIfNotExists(
-    "Payment Due",
-    `Invoice ${invoice_number} payment is pending.`,
-    "Payment Due"
-);
-}
+        if (status !== "Paid") {
+            await Notification.createNotificationIfNotExists(
+                "Payment Due",
+                `Invoice ${invoice_number} payment is pending.`,
+                "Payment Due"
+            );
+        }
 
         res.status(201).json({
             success: true,
@@ -120,14 +122,33 @@ const markInvoiceAsPaid = async (req, res, next) => {
         const { id } = req.params;
         const { payment_method, transaction_id } = req.body;
 
-        // Check if invoice exists
         const invoice = await Invoice.getInvoiceById(id);
 
         if (!invoice) {
-            return res.status(404).json({
-                success: false,
-                message: "Invoice not found",
-            });
+            return next(new AppError("Invoice not found", 404));
+        }
+        if (invoice.status !== "Approved") {
+    return next(
+        new AppError(
+            "Only approved invoices can be marked as paid.",
+            400
+        )
+    );
+}
+
+if (invoice.payment_status === "Paid") {
+    return next(
+        new AppError(
+            "Invoice is already marked as paid.",
+            400
+        )
+    );
+}
+
+        if (!payment_method) {
+            return next(
+                new AppError("Payment method is required", 400)
+            );
         }
 
         await Invoice.markInvoiceAsPaid(

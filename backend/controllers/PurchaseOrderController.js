@@ -1,23 +1,19 @@
-const PurchaseOrder = require("../models/PurchaseOrder");
-const Notification = require("../models/Notification");
+const PurchaseOrderService = require("../services/PurchaseOrderService");
 
 // Create Purchase Order
 const createPurchaseOrder = async (req, res, next) => {
     try {
-        const { vendor_id, items } = req.body;
 
-        const order = await PurchaseOrder.createPurchaseOrder(
-            vendor_id,
-            items
-        );
+        const result =
+            await PurchaseOrderService.createPurchaseOrder(req.body);
 
         res.status(201).json({
+            success: true,
             message: "Purchase Order created successfully",
-            orderId: order.purchaseOrderId,
-            totalAmount: order.totalAmount,
-            status: order.status,
+            data: result,
         });
-    }  catch (error) {
+
+    } catch (error) {
         next(error);
     }
 };
@@ -25,10 +21,16 @@ const createPurchaseOrder = async (req, res, next) => {
 // Get All Purchase Orders
 const getAllPurchaseOrders = async (req, res, next) => {
     try {
-        const orders = await PurchaseOrder.getAllPurchaseOrders();
 
-        res.status(200).json(orders);
-    }  catch (error) {
+        const orders =
+            await PurchaseOrderService.getAllPurchaseOrders();
+
+        res.status(200).json({
+            success: true,
+            data: orders,
+        });
+
+    } catch (error) {
         next(error);
     }
 };
@@ -36,18 +38,18 @@ const getAllPurchaseOrders = async (req, res, next) => {
 // Get Purchase Order By ID
 const getPurchaseOrderById = async (req, res, next) => {
     try {
+
         const { id } = req.params;
 
-        const order = await PurchaseOrder.getPurchaseOrderById(id);
+        const order =
+            await PurchaseOrderService.getPurchaseOrderById(id);
 
-        if (order.length === 0) {
-            return res.status(404).json({
-                message: "Purchase Order not found",
-            });
-        }
+        res.status(200).json({
+            success: true,
+            data: order,
+        });
 
-        res.status(200).json(order);
-    }  catch (error) {
+    } catch (error) {
         next(error);
     }
 };
@@ -55,26 +57,20 @@ const getPurchaseOrderById = async (req, res, next) => {
 // Update Purchase Order Status
 const updatePurchaseOrderStatus = async (req, res, next) => {
     try {
+
         const { id } = req.params;
         const { status } = req.body;
 
-        const result = await PurchaseOrder.updatePurchaseOrderStatus(
+        await PurchaseOrderService.updatePurchaseOrderStatus(
             id,
             status
         );
-        const title = "Purchase Order Updated";
-        const message = `Purchase Order #${id} has been ${status}.`;
-
-       await Notification.createNotificationIfNotExists(
-    "Purchase Order Updated",
-    `Purchase Order #${id} has been ${status}.`,
-    "Purchase Update"
-);
-
 
         res.status(200).json({
+            success: true,
             message: "Purchase Order status updated successfully",
         });
+
     } catch (error) {
         next(error);
     }
