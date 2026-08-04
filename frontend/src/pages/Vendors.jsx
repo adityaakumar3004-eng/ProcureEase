@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
-import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+import {
+  getVendors,
+  createVendor,
+  updateVendor,
+  deleteVendor,
+} from "../services/vendorService";
+
 import VendorTable from "../components/vendors/VendorTable";
 import VendorModal from "../components/vendors/VendorModal";
 
 function Vendors() {
+  const { isAdmin, isManager } = useAuth();
+
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -30,20 +39,25 @@ function Vendors() {
 
   const fetchVendors = async () => {
     try {
-      const response = await api.get("/vendors");
-      setVendors(response.data.data);
+      setLoading(true);
+
+     const response = await getVendors();
+
+     console.log("Vendors:", response);
+
+     setVendors(response.data);
     } catch (error) {
-      console.error("Error fetching vendors:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleEdit = (vendor) => {
@@ -61,18 +75,16 @@ function Vendors() {
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this vendor?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this vendor?")) {
+      return;
+    }
 
     try {
-      await api.delete(`/vendors/${id}`);
+      await deleteVendor(id);
       fetchVendors();
     } catch (error) {
-      console.error("Error deleting vendor:", error);
-      alert("Failed to delete vendor");
+      console.error(error);
+      alert("Failed to delete vendor.");
     }
   };
 
@@ -81,9 +93,9 @@ function Vendors() {
 
     try {
       if (isEditing) {
-        await api.put(`/vendors/${editingId}`, formData);
+        await updateVendor(editingId, formData);
       } else {
-        await api.post("/vendors", formData);
+        await createVendor(formData);
       }
 
       fetchVendors();
@@ -96,11 +108,11 @@ function Vendors() {
       });
 
       setShowModal(false);
-      setIsEditing(false);
       setEditingId(null);
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
-      alert("Operation Failed");
+      alert("Operation failed.");
     }
   };
 
@@ -137,32 +149,40 @@ function Vendors() {
 
   return (
     <div>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Vendors</h1>
 
-        <button
-          onClick={() => {
-            setIsEditing(false);
-            setEditingId(null);
+        <h1 className="text-3xl font-bold">
+          Vendors
+        </h1>
 
-            setFormData({
-              name: "",
-              email: "",
-              phone: "",
-              address: "",
-            });
+        {(isAdmin || isManager) && (
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setEditingId(null);
 
-            setShowModal(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-        >
-          + Add Vendor
-        </button>
+              setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                address: "",
+              });
+
+              setShowModal(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+          >
+            + Add Vendor
+          </button>
+        )}
+
       </div>
 
       {/* Search */}
       <div className="mb-6">
+
         <input
           type="text"
           placeholder="🔍 Search vendors..."
@@ -170,6 +190,7 @@ function Vendors() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
       </div>
 
       {/* Vendor Table */}
@@ -181,7 +202,9 @@ function Vendors() {
 
       {/* Pagination */}
       {totalPages > 1 && (
+
         <div className="flex justify-between items-center mt-6">
+
           <button
             onClick={() => setCurrentPage((prev) => prev - 1)}
             disabled={currentPage === 1}
@@ -201,7 +224,9 @@ function Vendors() {
           >
             Next
           </button>
+
         </div>
+
       )}
 
       {/* Vendor Modal */}
@@ -216,6 +241,7 @@ function Vendors() {
         setIsEditing={setIsEditing}
         setEditingId={setEditingId}
       />
+
     </div>
   );
 }

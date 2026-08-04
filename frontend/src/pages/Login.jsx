@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../services/api";
+
+import { loginUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
@@ -16,10 +17,10 @@ function Login() {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,14 +30,15 @@ function Login() {
     setError("");
 
     try {
-      const response = await api.post("/auth/login", formData);
+      const response = await loginUser(formData);
 
-      login(response.data.token, response.data.user);
+      login(response.token, response.user);
 
       navigate("/dashboard");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Login failed. Please try again."
+        err.response?.data?.message ||
+          "Login failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -56,7 +58,7 @@ function Login() {
         </p>
 
         {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
+          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
             {error}
           </div>
         )}
@@ -73,9 +75,9 @@ function Login() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter email"
               required
+              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -89,16 +91,16 @@ function Login() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter password"
               required
+              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
