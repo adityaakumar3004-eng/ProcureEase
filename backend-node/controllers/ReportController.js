@@ -1,4 +1,4 @@
-// controllers/reportController.js
+// controllers/ReportController.js
 
 const Report = require("../models/Report");
 
