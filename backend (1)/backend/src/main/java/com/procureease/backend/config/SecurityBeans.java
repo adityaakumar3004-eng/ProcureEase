@@ -1,14 +1,13 @@
 package com.procureease.backend.config;
 
-import com.procureease.backend.repository.UserRepository;
+import com.procureease.backend.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,35 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class SecurityBeans {
 
-    private final UserRepository userRepository;
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-
-        return username -> {
-
-            com.procureease.backend.entity.User user =
-                    userRepository.findByEmail(username)
-                            .orElseThrow(() ->
-                                    new RuntimeException("User not found"));
-
-            return org.springframework.security.core.userdetails.User
-                    .builder()
-                    .username(user.getEmail())
-                    .password(user.getPassword())
-                    .roles(user.getRole())
-                    .build();
-        };
-    }
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
 
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider();
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 
-        provider.setUserDetailsService(userDetailsService());
-
+        provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
 
         return provider;
@@ -52,10 +30,10 @@ public class SecurityBeans {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config)
-            throws Exception {
+            AuthenticationConfiguration configuration
+    ) throws Exception {
 
-        return config.getAuthenticationManager();
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
