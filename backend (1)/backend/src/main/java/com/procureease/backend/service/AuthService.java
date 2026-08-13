@@ -20,6 +20,8 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtService jwtService;
+
     // ============================
     // Register User
     // ============================
@@ -63,6 +65,9 @@ public class AuthService {
             throw new ResourceNotFoundException("Invalid Email or Password");
         }
 
+        // Generate JWT Token
+        String token = jwtService.generateToken(user);
+
         // Build User Response
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
@@ -74,9 +79,8 @@ public class AuthService {
         // Return Login Response
         return LoginResponse.builder()
                 .message("Login Successful")
-                .token("")
+                .token(token)
                 .user(userResponse)
                 .build();
     }
-
 }
