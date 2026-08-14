@@ -74,13 +74,16 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
-    // ============================
-    // Generic Exception
-    // ============================
+// ============================
+// Generic Exception
+// ============================
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex) {
+
+        // Print the actual exception in IntelliJ
+        ex.printStackTrace();
 
         Map<String, Object> response = new HashMap<>();
 
