@@ -22,24 +22,60 @@ public class SecurityConfig {
             throws Exception {
 
         http
+                // Disable CSRF because this is a stateless REST API
                 .csrf(csrf -> csrf.disable())
 
+                // ============================
+                // Authorization Rules
+                // ============================
                 .authorizeHttpRequests(auth -> auth
+
+                        // Authentication APIs are public
                         .requestMatchers("/api/auth/**")
                         .permitAll()
 
+                        // Create Vendor
+                        .requestMatchers(org.springframework.http.HttpMethod.POST,
+                                "/api/vendors")
+                        .hasAnyRole("ADMIN", "MANAGER")
+
+                        // Get All Vendors
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                "/api/vendors")
+                        .hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+
+                        // Update Vendor
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT,
+                                "/api/vendors/**")
+                        .hasAnyRole("ADMIN", "MANAGER")
+
+                        // Delete Vendor
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE,
+                                "/api/vendors/**")
+                        .hasRole("ADMIN")
+
+                        // Everything else requires authentication
                         .anyRequest()
                         .authenticated()
                 )
 
+                // ============================
+                // Stateless Session
+                // ============================
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
+                // ============================
+                // Authentication Provider
+                // ============================
                 .authenticationProvider(authenticationProvider)
 
+                // ============================
+                // JWT Filter
+                // ============================
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
