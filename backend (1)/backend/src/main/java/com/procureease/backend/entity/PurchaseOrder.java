@@ -2,6 +2,8 @@ package com.procureease.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -72,20 +74,25 @@ public class PurchaseOrder {
             new ArrayList<>();
 
     // ============================
-    // Timestamps
+    // Created At
     // ============================
 
+    @CreationTimestamp
     @Column(
             name = "created_at",
-            insertable = false,
+            nullable = false,
             updatable = false
     )
     private LocalDateTime createdAt;
 
+    // ============================
+    // Updated At
+    // ============================
+
+    @UpdateTimestamp
     @Column(
             name = "updated_at",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private LocalDateTime updatedAt;
 }
