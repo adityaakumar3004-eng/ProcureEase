@@ -102,7 +102,6 @@ public class ReportService {
 
     public InventoryReportResponse getInventoryReport() {
 
-        // Get total inventory value
         BigDecimal inventoryValue =
                 reportRepository.getInventoryValue();
 
@@ -111,7 +110,6 @@ public class ReportService {
                         .inventoryValue(inventoryValue)
                         .build();
 
-        // Get low stock products
         List<LowStockProductResponse> lowStock =
                 reportRepository
                         .getLowStockProducts()
@@ -119,7 +117,6 @@ public class ReportService {
                         .map(this::mapLowStockProductToResponse)
                         .toList();
 
-        // Get all products
         List<InventoryProductResponse> products =
                 reportRepository
                         .getAllProductsForInventoryReport()
@@ -132,6 +129,37 @@ public class ReportService {
                 .lowStock(lowStock)
                 .products(products)
                 .build();
+    }
+
+    // ============================================================
+    // Vendor Report
+    // ============================================================
+
+    public List<VendorReportItemResponse> getVendorReport() {
+
+        return reportRepository
+                .getVendorReport()
+                .stream()
+                .map(row ->
+                        VendorReportItemResponse.builder()
+                                .id(
+                                        ((Number) row[0])
+                                                .intValue()
+                                )
+                                .name(
+                                        (String) row[1]
+                                )
+                                .totalProducts(
+                                        ((Number) row[2])
+                                                .longValue()
+                                )
+                                .totalPurchaseOrders(
+                                        ((Number) row[3])
+                                                .longValue()
+                                )
+                                .build()
+                )
+                .toList();
     }
 
     // ============================================================

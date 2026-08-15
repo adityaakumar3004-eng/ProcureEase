@@ -1,8 +1,9 @@
 package com.procureease.backend.repository;
 
+import com.procureease.backend.entity.Product;
 import com.procureease.backend.entity.PurchaseOrder;
 import com.procureease.backend.entity.Sale;
-import com.procureease.backend.entity.Product;
+import com.procureease.backend.entity.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -110,4 +111,24 @@ public interface ReportRepository
             ORDER BY p.name ASC
             """)
     List<Product> getAllProductsForInventoryReport();
+
+    // ============================================================
+    // Vendor Report
+    // ============================================================
+
+    @Query("""
+            SELECT
+                v.id,
+                v.name,
+                COUNT(DISTINCT p.id),
+                COUNT(DISTINCT po.id)
+            FROM Vendor v
+            LEFT JOIN Product p
+                ON p.vendor.id = v.id
+            LEFT JOIN PurchaseOrder po
+                ON po.vendor.id = v.id
+            GROUP BY v.id, v.name
+            ORDER BY v.name ASC
+            """)
+    List<Object[]> getVendorReport();
 }
