@@ -148,12 +148,13 @@ public class ProductService {
 
     public ProductResponse getProductById(Integer id) {
 
-        Product product = productRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Product not found"
-                        )
-                );
+        Product product =
+                productRepository.findProductWithVendorById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Product not found"
+                                )
+                        );
 
         return mapToResponse(product);
     }

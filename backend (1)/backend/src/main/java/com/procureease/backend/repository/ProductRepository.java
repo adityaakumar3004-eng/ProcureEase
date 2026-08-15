@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
@@ -38,5 +39,19 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable
+    );
+
+    // ============================================================
+    // Get Product By ID With Vendor
+    // ============================================================
+
+    @Query("""
+            SELECT p
+            FROM Product p
+            JOIN FETCH p.vendor
+            WHERE p.id = :id
+            """)
+    Optional<Product> findProductWithVendorById(
+            @Param("id") Integer id
     );
 }
