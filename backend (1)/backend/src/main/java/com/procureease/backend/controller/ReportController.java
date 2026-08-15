@@ -1,5 +1,6 @@
 package com.procureease.backend.controller;
 
+import com.procureease.backend.dto.PurchaseReportResponse;
 import com.procureease.backend.dto.SalesReportResponse;
 import com.procureease.backend.service.ReportService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,29 @@ public class ReportController {
 
         SalesReportResponse report =
                 reportService.getSalesReport();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+        response.put("data", report);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
+    // Purchase Report
+    // ============================================================
+
+    @GetMapping("/purchases")
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')"
+    )
+    public ResponseEntity<Map<String, Object>>
+    getPurchaseReport() {
+
+        PurchaseReportResponse report =
+                reportService.getPurchaseReport();
 
         Map<String, Object> response =
                 new HashMap<>();

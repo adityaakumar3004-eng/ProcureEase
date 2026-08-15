@@ -1,5 +1,6 @@
 package com.procureease.backend.repository;
 
+import com.procureease.backend.entity.PurchaseOrder;
 import com.procureease.backend.entity.Sale;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,4 +41,36 @@ public interface ReportRepository
             ORDER BY s.createdAt DESC
             """)
     List<Sale> getAllSalesForReport();
+
+    // ============================================================
+    // Purchase Report - Total Purchase Orders
+    // ============================================================
+
+    @Query("""
+            SELECT COUNT(po)
+            FROM PurchaseOrder po
+            """)
+    long getTotalPurchaseOrders();
+
+    // ============================================================
+    // Purchase Report - Status Summary
+    // ============================================================
+
+    @Query("""
+            SELECT po.status, COUNT(po)
+            FROM PurchaseOrder po
+            GROUP BY po.status
+            """)
+    List<Object[]> getPurchaseStatusSummary();
+
+    // ============================================================
+    // Purchase Report - All Purchase Orders
+    // ============================================================
+
+    @Query("""
+            SELECT po
+            FROM PurchaseOrder po
+            ORDER BY po.createdAt DESC
+            """)
+    List<PurchaseOrder> getAllPurchasesForReport();
 }
