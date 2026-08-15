@@ -10,16 +10,24 @@ import java.util.Optional;
 public interface PurchaseOrderRepository
         extends JpaRepository<PurchaseOrder, Integer> {
 
-    // Get all purchase orders with vendor loaded
+    // ============================================================
+    // Get All Purchase Orders With Details
+    // ============================================================
+
     @Query("""
             SELECT DISTINCT po
             FROM PurchaseOrder po
             JOIN FETCH po.vendor
+            LEFT JOIN FETCH po.items items
+            LEFT JOIN FETCH items.product
             ORDER BY po.id DESC
             """)
-    List<PurchaseOrder> findAllWithVendor();
+    List<PurchaseOrder> findAllWithDetails();
 
-    // Get purchase order with vendor and items loaded
+    // ============================================================
+    // Get Purchase Order By ID With Details
+    // ============================================================
+
     @Query("""
             SELECT DISTINCT po
             FROM PurchaseOrder po
@@ -28,5 +36,7 @@ public interface PurchaseOrderRepository
             LEFT JOIN FETCH items.product
             WHERE po.id = :id
             """)
-    Optional<PurchaseOrder> findByIdWithDetails(Integer id);
+    Optional<PurchaseOrder> findByIdWithDetails(
+            Integer id
+    );
 }
