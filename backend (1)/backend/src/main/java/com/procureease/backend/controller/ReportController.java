@@ -1,5 +1,6 @@
 package com.procureease.backend.controller;
 
+import com.procureease.backend.dto.InventoryReportResponse;
 import com.procureease.backend.dto.PurchaseReportResponse;
 import com.procureease.backend.dto.SalesReportResponse;
 import com.procureease.backend.service.ReportService;
@@ -54,6 +55,29 @@ public class ReportController {
 
         PurchaseReportResponse report =
                 reportService.getPurchaseReport();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+        response.put("data", report);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
+    // Inventory Report
+    // ============================================================
+
+    @GetMapping("/inventory")
+    @PreAuthorize(
+            "hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')"
+    )
+    public ResponseEntity<Map<String, Object>>
+    getInventoryReport() {
+
+        InventoryReportResponse report =
+                reportService.getInventoryReport();
 
         Map<String, Object> response =
                 new HashMap<>();

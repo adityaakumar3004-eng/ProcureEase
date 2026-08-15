@@ -2,6 +2,7 @@ package com.procureease.backend.repository;
 
 import com.procureease.backend.entity.PurchaseOrder;
 import com.procureease.backend.entity.Sale;
+import com.procureease.backend.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -73,4 +74,40 @@ public interface ReportRepository
             ORDER BY po.createdAt DESC
             """)
     List<PurchaseOrder> getAllPurchasesForReport();
+
+    // ============================================================
+    // Inventory Report - Inventory Value
+    // ============================================================
+
+    @Query("""
+            SELECT COALESCE(
+                SUM(p.price * p.stock),
+                0
+            )
+            FROM Product p
+            """)
+    BigDecimal getInventoryValue();
+
+    // ============================================================
+    // Inventory Report - Low Stock Products
+    // ============================================================
+
+    @Query("""
+            SELECT p
+            FROM Product p
+            WHERE p.stock < 10
+            ORDER BY p.stock ASC
+            """)
+    List<Product> getLowStockProducts();
+
+    // ============================================================
+    // Inventory Report - All Products
+    // ============================================================
+
+    @Query("""
+            SELECT p
+            FROM Product p
+            ORDER BY p.name ASC
+            """)
+    List<Product> getAllProductsForInventoryReport();
 }

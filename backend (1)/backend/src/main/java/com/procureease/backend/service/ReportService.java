@@ -1,12 +1,7 @@
 package com.procureease.backend.service;
 
-import com.procureease.backend.dto.PurchaseReportItemResponse;
-import com.procureease.backend.dto.PurchaseReportResponse;
-import com.procureease.backend.dto.PurchaseStatusSummaryResponse;
-import com.procureease.backend.dto.PurchaseSummaryResponse;
-import com.procureease.backend.dto.SalesReportItemResponse;
-import com.procureease.backend.dto.SalesReportResponse;
-import com.procureease.backend.dto.SalesSummaryResponse;
+import com.procureease.backend.dto.*;
+import com.procureease.backend.entity.Product;
 import com.procureease.backend.entity.PurchaseOrder;
 import com.procureease.backend.entity.Sale;
 import com.procureease.backend.repository.ReportRepository;
@@ -28,7 +23,6 @@ public class ReportService {
 
     public SalesReportResponse getSalesReport() {
 
-        // Get summary
         long totalSales =
                 reportRepository.getTotalSales();
 
@@ -41,7 +35,6 @@ public class ReportService {
                         .totalRevenue(totalRevenue)
                         .build();
 
-        // Get sales
         List<SalesReportItemResponse> sales =
                 reportRepository
                         .getAllSalesForReport()
@@ -61,7 +54,6 @@ public class ReportService {
 
     public PurchaseReportResponse getPurchaseReport() {
 
-        // Get summary
         long totalPurchaseOrders =
                 reportRepository.getTotalPurchaseOrders();
 
@@ -72,7 +64,6 @@ public class ReportService {
                         )
                         .build();
 
-        // Get status summary
         List<PurchaseStatusSummaryResponse> statusSummary =
                 reportRepository
                         .getPurchaseStatusSummary()
@@ -91,7 +82,6 @@ public class ReportService {
                         )
                         .toList();
 
-        // Get all purchase orders
         List<PurchaseReportItemResponse> purchases =
                 reportRepository
                         .getAllPurchasesForReport()
@@ -103,6 +93,44 @@ public class ReportService {
                 .summary(summary)
                 .statusSummary(statusSummary)
                 .purchases(purchases)
+                .build();
+    }
+
+    // ============================================================
+    // Inventory Report
+    // ============================================================
+
+    public InventoryReportResponse getInventoryReport() {
+
+        // Get total inventory value
+        BigDecimal inventoryValue =
+                reportRepository.getInventoryValue();
+
+        InventoryValueResponse inventoryValueResponse =
+                InventoryValueResponse.builder()
+                        .inventoryValue(inventoryValue)
+                        .build();
+
+        // Get low stock products
+        List<LowStockProductResponse> lowStock =
+                reportRepository
+                        .getLowStockProducts()
+                        .stream()
+                        .map(this::mapLowStockProductToResponse)
+                        .toList();
+
+        // Get all products
+        List<InventoryProductResponse> products =
+                reportRepository
+                        .getAllProductsForInventoryReport()
+                        .stream()
+                        .map(this::mapInventoryProductToResponse)
+                        .toList();
+
+        return InventoryReportResponse.builder()
+                .inventoryValue(inventoryValueResponse)
+                .lowStock(lowStock)
+                .products(products)
                 .build();
     }
 
@@ -148,6 +176,37 @@ public class ReportService {
                 .createdAt(
                         purchaseOrder.getCreatedAt()
                 )
+                .build();
+    }
+
+    // ============================================================
+    // Convert Product → Low Stock Response
+    // ============================================================
+
+    private LowStockProductResponse mapLowStockProductToResponse(
+            Product product
+    ) {
+
+        return LowStockProductResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .stock(product.getStock())
+                .build();
+    }
+
+    // ============================================================
+    // Convert Product → Inventory Response
+    // ============================================================
+
+    private InventoryProductResponse mapInventoryProductToResponse(
+            Product product
+    ) {
+
+        return InventoryProductResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .stock(product.getStock())
+                .price(product.getPrice())
                 .build();
     }
 }
