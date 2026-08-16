@@ -19,6 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("""
             SELECT p
             FROM Product p
+            JOIN FETCH p.vendor
             WHERE
                 (:search IS NULL
                  OR :search = ''
