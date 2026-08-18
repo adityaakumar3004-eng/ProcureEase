@@ -18,6 +18,26 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     // ============================================================
+    // Get All Notifications
+    // ============================================================
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getAllNotifications() {
+
+        List<NotificationResponse> notifications =
+                notificationService.getAllNotifications();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+        response.put("count", notifications.size());
+        response.put("data", notifications);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
     // Generate Low Stock Notifications
     // ============================================================
 
@@ -46,23 +66,31 @@ public class NotificationController {
     }
 
     // ============================================================
-    // Get All Notifications
+    // Generate Payment Due Notifications
     // ============================================================
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllNotifications() {
+    @PostMapping("/payment-due")
+    public ResponseEntity<Map<String, Object>>
+    generatePaymentDueNotifications() {
 
-        List<NotificationResponse> notifications =
-                notificationService.getAllNotifications();
+        int notificationsCreated =
+                notificationService
+                        .generatePaymentDueNotifications();
 
         Map<String, Object> response =
                 new HashMap<>();
 
         response.put("success", true);
-        response.put("count", notifications.size());
-        response.put("data", notifications);
 
-        return ResponseEntity.ok(response);
+        response.put(
+                "message",
+                notificationsCreated +
+                        " payment due notification(s) created."
+        );
+
+        return ResponseEntity
+                .status(201)
+                .body(response);
     }
 
     // ============================================================
@@ -80,7 +108,6 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
-
         response.put(
                 "message",
                 "Notification marked as read."
@@ -104,7 +131,6 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
-
         response.put(
                 "message",
                 "Notification deleted successfully."
@@ -138,7 +164,6 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
-
         response.put(
                 "message",
                 "Purchase update notification created successfully."

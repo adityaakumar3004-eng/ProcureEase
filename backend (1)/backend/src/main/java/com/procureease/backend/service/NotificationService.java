@@ -1,9 +1,11 @@
 package com.procureease.backend.service;
 
 import com.procureease.backend.dto.NotificationResponse;
+import com.procureease.backend.entity.Invoice;
 import com.procureease.backend.entity.Notification;
 import com.procureease.backend.entity.Product;
 import com.procureease.backend.exception.ResourceNotFoundException;
+import com.procureease.backend.repository.InvoiceRepository;
 import com.procureease.backend.repository.NotificationRepository;
 import com.procureease.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     private final ProductRepository productRepository;
+
+    private final InvoiceRepository invoiceRepository;
 
     private static final int LOW_STOCK_LIMIT = 10;
 
@@ -174,6 +178,47 @@ public class NotificationService {
 
             if (created) {
                 notificationsCreated++;
+            }
+        }
+
+        return notificationsCreated;
+    }
+
+    // ============================================================
+    // Generate Payment Due Notifications
+    // ============================================================
+
+    public int generatePaymentDueNotifications() {
+
+        List<Invoice> invoices =
+                invoiceRepository
+                        .findAllWithPurchaseOrder();
+
+        int notificationsCreated = 0;
+
+        for (Invoice invoice : invoices) {
+
+            if (!"Paid".equalsIgnoreCase(
+                    invoice.getPaymentStatus()
+            )) {
+
+                String title = "Payment Due";
+
+                String message =
+                        "Invoice " +
+                                invoice.getInvoiceNumber() +
+                                " payment is pending.";
+
+                boolean created =
+                        createNotificationIfNotExists(
+                                title,
+                                message,
+                                "Payment Due"
+                        );
+
+                if (created) {
+                    notificationsCreated++;
+                }
             }
         }
 
