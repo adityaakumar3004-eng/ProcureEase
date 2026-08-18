@@ -39,4 +39,30 @@ public interface PurchaseOrderRepository
     Optional<PurchaseOrder> findByIdWithDetails(
             Integer id
     );
+
+    // ============================================================
+    // Dashboard - Recent Purchase Orders
+    // ============================================================
+
+    @Query("""
+            SELECT po
+            FROM PurchaseOrder po
+            JOIN FETCH po.vendor
+            ORDER BY po.id DESC
+            """)
+    List<PurchaseOrder> findRecentPurchaseOrdersWithVendor();
+
+    // ============================================================
+    // Dashboard - Purchase Trends
+    // ============================================================
+
+    @Query("""
+            SELECT
+                MONTH(po.createdAt),
+                COUNT(po)
+            FROM PurchaseOrder po
+            GROUP BY MONTH(po.createdAt)
+            ORDER BY MONTH(po.createdAt)
+            """)
+    List<Object[]> getPurchaseTrends();
 }

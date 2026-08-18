@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
@@ -55,4 +56,40 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findProductWithVendorById(
             @Param("id") Integer id
     );
+
+    // ============================================================
+    // Dashboard - Inventory Value
+    // ============================================================
+
+    @Query("""
+            SELECT COALESCE(SUM(p.price * p.stock), 0)
+            FROM Product p
+            """)
+    BigDecimal getInventoryValue();
+
+    // ============================================================
+    // Dashboard - Low Stock Products
+    // ============================================================
+
+    List<Product> findByStockLessThanOrderByStockAsc(Integer stock);
+
+    // ============================================================
+    // Dashboard - Inventory Distribution
+    // ============================================================
+
+    @Query("""
+            SELECT
+                CASE
+                    WHEN p.stock < 10 THEN 'Low Stock'
+                    ELSE 'Healthy Stock'
+                END,
+                COUNT(p)
+            FROM Product p
+            GROUP BY
+                CASE
+                    WHEN p.stock < 10 THEN 'Low Stock'
+                    ELSE 'Healthy Stock'
+                END
+            """)
+    List<Object[]> getInventoryDistribution();
 }
