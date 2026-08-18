@@ -18,6 +18,34 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     // ============================================================
+    // Generate Low Stock Notifications
+    // ============================================================
+
+    @PostMapping("/low-stock")
+    public ResponseEntity<Map<String, Object>>
+    generateLowStockNotifications() {
+
+        int notificationsCreated =
+                notificationService
+                        .generateLowStockNotifications();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+
+        response.put(
+                "message",
+                notificationsCreated +
+                        " low stock notification(s) created."
+        );
+
+        return ResponseEntity
+                .status(201)
+                .body(response);
+    }
+
+    // ============================================================
     // Get All Notifications
     // ============================================================
 
@@ -52,6 +80,7 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Notification marked as read."
@@ -75,6 +104,7 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Notification deleted successfully."
@@ -108,6 +138,7 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Purchase update notification created successfully."

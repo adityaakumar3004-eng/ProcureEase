@@ -2,8 +2,10 @@ package com.procureease.backend.service;
 
 import com.procureease.backend.dto.NotificationResponse;
 import com.procureease.backend.entity.Notification;
+import com.procureease.backend.entity.Product;
 import com.procureease.backend.exception.ResourceNotFoundException;
 import com.procureease.backend.repository.NotificationRepository;
+import com.procureease.backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+
+    private final ProductRepository productRepository;
 
     private static final int LOW_STOCK_LIMIT = 10;
 
@@ -147,6 +151,33 @@ public class NotificationService {
                 message,
                 "Low Stock"
         );
+    }
+
+    // ============================================================
+    // Generate Low Stock Notifications
+    // ============================================================
+
+    public int generateLowStockNotifications() {
+
+        List<Product> products =
+                productRepository.findAll();
+
+        int notificationsCreated = 0;
+
+        for (Product product : products) {
+
+            boolean created =
+                    createLowStockNotification(
+                            product.getName(),
+                            product.getStock()
+                    );
+
+            if (created) {
+                notificationsCreated++;
+            }
+        }
+
+        return notificationsCreated;
     }
 
     // ============================================================
