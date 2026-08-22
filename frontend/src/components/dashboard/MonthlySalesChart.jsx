@@ -15,13 +15,13 @@ import {
 import { Line } from "react-chartjs-2";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
 );
 
 function MonthlySalesChart() {
@@ -38,8 +38,9 @@ function MonthlySalesChart() {
     try {
       const response = await api.get("/dashboard/monthly-sales");
 
-      const labels = response.data.data.map((item) => item.month);
-      const sales = response.data.data.map((item) => item.sales);
+      // Backend directly returns a List
+      const labels = response.data.map((item) => item.month);
+      const sales = response.data.map((item) => item.sales);
 
       setChartData({
         labels,
@@ -60,36 +61,36 @@ function MonthlySalesChart() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow mt-8">
-      <h2 className="text-2xl font-bold mb-6">
-        Monthly Sales
-      </h2>
+      <div className="bg-white p-6 rounded-xl shadow mt-8">
+        <h2 className="text-2xl font-bold mb-6">
+          Monthly Sales
+        </h2>
 
-      <Line
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "top",
-            },
-            title: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function (value) {
-                  return "₹" + value.toLocaleString();
+        <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                title: {
+                  display: false,
                 },
               },
-            },
-          },
-        }}
-      />
-    </div>
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function (value) {
+                      return "₹" + value.toLocaleString();
+                    },
+                  },
+                },
+              },
+            }}
+        />
+      </div>
   );
 }
 

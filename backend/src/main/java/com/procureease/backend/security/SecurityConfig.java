@@ -1,13 +1,13 @@
 package com.procureease.backend.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -24,8 +24,14 @@ public class SecurityConfig {
             throws Exception {
 
         http
+
+                // Enable CORS
+                .cors(cors -> {})
+
+                // Disable CSRF for REST APIs
                 .csrf(csrf -> csrf.disable())
 
+                // Authorization Rules
                 .authorizeHttpRequests(auth -> auth
 
                         // Public Auth APIs
@@ -45,14 +51,17 @@ public class SecurityConfig {
                         .authenticated()
                 )
 
+                // Stateless JWT Authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
+                // Authentication Provider
                 .authenticationProvider(authenticationProvider)
 
+                // JWT Filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

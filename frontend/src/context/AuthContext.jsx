@@ -34,9 +34,7 @@ export function AuthProvider({ children }) {
         user,
         login,
         logout,
-
         isAuthenticated: !!user,
-
         isAdmin,
         isManager,
         isEmployee,

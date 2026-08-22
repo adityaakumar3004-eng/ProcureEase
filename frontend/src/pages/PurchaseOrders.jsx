@@ -21,7 +21,6 @@ function PurchaseOrders() {
   const [products, setProducts] = useState([]);
 
   const [loading, setLoading] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,10 +29,10 @@ function PurchaseOrders() {
   const purchaseOrdersPerPage = 5;
 
   const [formData, setFormData] = useState({
-    vendor_id: "",
+    vendorId: "",
     items: [
       {
-        product_id: "",
+        productId: "",
         quantity: "",
       },
     ],
@@ -45,59 +44,94 @@ function PurchaseOrders() {
     fetchProducts();
   }, []);
 
+  // ==========================================
+  // Fetch Purchase Orders
+  // ==========================================
+
   const fetchPurchaseOrders = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-  const response = await getPurchaseOrders();
+      const response = await getPurchaseOrders();
 
-console.log("Purchase Orders:", response);
+      console.log("Purchase Orders:", response);
 
-setPurchaseOrders(response);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+      setPurchaseOrders(response.data || []);
+    } catch (error) {
+      console.error("Error fetching purchase orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // Fetch Vendors
+  // ==========================================
 
   const fetchVendors = async () => {
     try {
       const response = await getVendors();
 
-      setVendors(response.data);
+      setVendors(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching vendors:", error);
     }
   };
+
+  // ==========================================
+  // Fetch Products
+  // ==========================================
 
   const fetchProducts = async () => {
     try {
-      const response = await getProducts();
+      const response = await getProducts({
+        page: 1,
+        limit: 100,
+      });
 
-      setProducts(response.data);
+      setProducts(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching products:", error);
     }
   };
 
+  // ==========================================
+  // Vendor Change
+  // ==========================================
+
   const handleVendorChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      vendor_id: e.target.value,
-    }));
+    setFormData({
+      vendorId: e.target.value,
+      items: [
+        {
+          productId: "",
+          quantity: "",
+        },
+      ],
+    });
   };
+
+  // ==========================================
+  // Purchase Order Item Change
+  // ==========================================
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
 
-    updatedItems[index][field] = value;
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: value,
+    };
 
     setFormData((prev) => ({
       ...prev,
       items: updatedItems,
     }));
   };
+
+  // ==========================================
+  // Add Item
+  // ==========================================
 
   const addItem = () => {
     setFormData((prev) => ({
@@ -105,195 +139,234 @@ setPurchaseOrders(response);
       items: [
         ...prev.items,
         {
-          product_id: "",
+          productId: "",
           quantity: "",
         },
       ],
     }));
   };
 
+  // ==========================================
+  // Remove Item
+  // ==========================================
+
   const removeItem = (index) => {
     if (formData.items.length === 1) return;
 
-    const updatedItems = formData.items.filter(
-      (_, i) => i !== index
-    );
-
     setFormData((prev) => ({
       ...prev,
-      items: updatedItems,
+      items: prev.items.filter((_, i) => i !== index),
     }));
   };
-    const handleSubmit = async (e) => {
+
+  // ==========================================
+  // Create Purchase Order
+  // ==========================================
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await createPurchaseOrder(formData);
+      const purchaseOrderData = {
+        vendorId: Number(formData.vendorId),
 
-      fetchPurchaseOrders();
+        items: formData.items.map((item) => ({
+          productId: Number(item.productId),
+          quantity: Number(item.quantity),
+        })),
+      };
+
+      await createPurchaseOrder(purchaseOrderData);
+
+      await fetchPurchaseOrders();
 
       setFormData({
-        vendor_id: "",
+        vendorId: "",
         items: [
           {
-            product_id: "",
+            productId: "",
             quantity: "",
           },
         ],
       });
 
       setShowModal(false);
-
     } catch (error) {
       console.error(error);
-      alert("Failed to create Purchase Order.");
+
+      alert(
+          error.response?.data?.message ||
+          "Failed to create Purchase Order."
+      );
     }
   };
+
+  // ==========================================
+  // Update Purchase Order Status
+  // ==========================================
 
   const handleStatusUpdate = async (id, status) => {
     try {
       await updatePurchaseOrderStatus(id, status);
 
-      fetchPurchaseOrders();
-
+      await fetchPurchaseOrders();
     } catch (error) {
       console.error(error);
-      alert("Failed to update purchase order status.");
+
+      alert(
+          error.response?.data?.message ||
+          "Failed to update purchase order status."
+      );
     }
   };
 
-  const filteredPurchaseOrders = useMemo(() => {
-    return purchaseOrders.filter((order) => {
-      const search = searchTerm.toLowerCase();
+  // ==========================================
+  // Search
+  // ==========================================
 
+  const filteredPurchaseOrders = useMemo(() => {
+    const search = searchTerm.toLowerCase();
+
+    return purchaseOrders.filter((order) => {
       return (
-        order.vendor_name.toLowerCase().includes(search) ||
-        order.status.toLowerCase().includes(search)
+          order.vendorName?.toLowerCase().includes(search) ||
+          order.status?.toLowerCase().includes(search) ||
+          String(order.id).includes(search)
       );
     });
   }, [purchaseOrders, searchTerm]);
 
+  // Reset page when searching
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  // ==========================================
+  // Pagination
+  // ==========================================
+
   const indexOfLastOrder =
-    currentPage * purchaseOrdersPerPage;
+      currentPage * purchaseOrdersPerPage;
 
   const indexOfFirstOrder =
-    indexOfLastOrder - purchaseOrdersPerPage;
+      indexOfLastOrder - purchaseOrdersPerPage;
 
   const currentOrders =
-    filteredPurchaseOrders.slice(
-      indexOfFirstOrder,
-      indexOfLastOrder
-    );
+      filteredPurchaseOrders.slice(
+          indexOfFirstOrder,
+          indexOfLastOrder
+      );
 
   const totalPages = Math.ceil(
-    filteredPurchaseOrders.length /
+      filteredPurchaseOrders.length /
       purchaseOrdersPerPage
   );
 
   if (loading) {
     return <h2>Loading Purchase Orders...</h2>;
   }
-    return (
-    <div>
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+  return (
+      <div>
 
-        <h1 className="text-3xl font-bold">
-          Purchase Orders
-        </h1>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
 
-        {(isAdmin || isManager) && (
-          <button
-            onClick={() => {
-              setFormData({
-                vendor_id: "",
-                items: [
-                  {
-                    product_id: "",
-                    quantity: "",
-                  },
-                ],
-              });
+          <h1 className="text-3xl font-bold">
+            Purchase Orders
+          </h1>
 
-              setShowModal(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-          >
-            + Create Purchase Order
-          </button>
-        )}
+          {(isAdmin || isManager) && (
+              <button
+                  onClick={() => {
+                    setFormData({
+                      vendorId: "",
+                      items: [
+                        {
+                          productId: "",
+                          quantity: "",
+                        },
+                      ],
+                    });
 
-      </div>
-
-      {/* Search */}
-      <div className="mb-6">
-
-        <input
-          type="text"
-          placeholder="Search purchase orders..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-      </div>
-
-      {/* Table */}
-      <PurchaseOrderTable
-        purchaseOrders={currentOrders}
-        handleStatusUpdate={handleStatusUpdate}
-      />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-
-        <div className="flex justify-between items-center mt-6">
-
-          <button
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            disabled={currentPage === 1}
-            className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Previous
-          </button>
-
-          <span className="font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            disabled={currentPage === totalPages}
-            className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Next
-          </button>
+                    setShowModal(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+              >
+                + Create Purchase Order
+              </button>
+          )}
 
         </div>
 
-      )}
+        {/* Search */}
+        <div className="mb-6">
+          <input
+              type="text"
+              placeholder="Search by ID, vendor, or status..."
+              value={searchTerm}
+              onChange={(e) =>
+                  setSearchTerm(e.target.value)
+              }
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-      {/* Modal */}
-      <PurchaseOrderModal
-        showModal={showModal}
-        setShowModal={setShowModal}
-        formData={formData}
-        setFormData={setFormData}
-        handleVendorChange={handleVendorChange}
-        handleItemChange={handleItemChange}
-        addItem={addItem}
-        removeItem={removeItem}
-        handleSubmit={handleSubmit}
-        vendors={vendors}
-        products={products}
-      />
+        {/* Purchase Order Table */}
+        <PurchaseOrderTable
+            purchaseOrders={currentOrders}
+            handleStatusUpdate={handleStatusUpdate}
+        />
 
-    </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-6">
+
+              <button
+                  onClick={() =>
+                      setCurrentPage((prev) => prev - 1)
+                  }
+                  disabled={currentPage === 1}
+                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+              >
+                Previous
+              </button>
+
+              <span className="font-semibold">
+            Page {currentPage} of {totalPages}
+          </span>
+
+              <button
+                  onClick={() =>
+                      setCurrentPage((prev) => prev + 1)
+                  }
+                  disabled={
+                      currentPage === totalPages
+                  }
+                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+              >
+                Next
+              </button>
+
+            </div>
+        )}
+
+        {/* Purchase Order Modal */}
+        <PurchaseOrderModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+            formData={formData}
+            setFormData={setFormData}
+            handleVendorChange={handleVendorChange}
+            handleItemChange={handleItemChange}
+            addItem={addItem}
+            removeItem={removeItem}
+            handleSubmit={handleSubmit}
+            vendors={vendors}
+            products={products}
+        />
+
+      </div>
   );
 }
 

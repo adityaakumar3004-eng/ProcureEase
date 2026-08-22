@@ -15,13 +15,8 @@ export const getInvoiceById = async (id) => {
 // Create Invoice
 export const createInvoice = async (formData) => {
   const response = await api.post(
-    "/invoices",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+      "/invoices",
+      formData
   );
 
   return response.data;
@@ -29,17 +24,12 @@ export const createInvoice = async (formData) => {
 
 // Update Invoice
 export const updateInvoice = async (
-  id,
-  formData
+    id,
+    formData
 ) => {
   const response = await api.put(
-    `/invoices/${id}`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+      `/invoices/${id}`,
+      formData
   );
 
   return response.data;
@@ -47,12 +37,12 @@ export const updateInvoice = async (
 
 // Mark Invoice as Paid
 export const markInvoiceAsPaid = async (
-  id,
-  paymentData
+    id,
+    paymentData
 ) => {
   const response = await api.put(
-    `/invoices/${id}/pay`,
-    paymentData
+      `/invoices/${id}/pay`,
+      paymentData
   );
 
   return response.data;
@@ -61,7 +51,7 @@ export const markInvoiceAsPaid = async (
 // Delete Invoice
 export const deleteInvoice = async (id) => {
   const response = await api.delete(
-    `/invoices/${id}`
+      `/invoices/${id}`
   );
 
   return response.data;

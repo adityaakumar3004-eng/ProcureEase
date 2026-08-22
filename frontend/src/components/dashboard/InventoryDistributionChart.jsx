@@ -11,9 +11,9 @@ import {
 import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend
+    ArcElement,
+    Tooltip,
+    Legend
 );
 
 function InventoryDistributionChart() {
@@ -29,15 +29,16 @@ function InventoryDistributionChart() {
   const fetchInventoryDistribution = async () => {
     try {
       const response = await api.get(
-        "/dashboard/inventory-distribution"
+          "/dashboard/inventory-distribution"
       );
 
-      const labels = response.data.data.map(
-        (item) => item.category
+      // Backend directly returns a List
+      const labels = response.data.map(
+          (item) => item.category
       );
 
-      const counts = response.data.data.map(
-        (item) => item.count
+      const counts = response.data.map(
+          (item) => item.count
       );
 
       setChartData({
@@ -55,30 +56,30 @@ function InventoryDistributionChart() {
       });
     } catch (error) {
       console.error(
-        "Error fetching inventory distribution:",
-        error
+          "Error fetching inventory distribution:",
+          error
       );
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow mt-8">
-      <h2 className="text-2xl font-bold mb-6">
-        Inventory Distribution
-      </h2>
+      <div className="bg-white p-6 rounded-xl shadow mt-8">
+        <h2 className="text-2xl font-bold mb-6">
+          Inventory Distribution
+        </h2>
 
-      <Doughnut
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom",
-            },
-          },
-        }}
-      />
-    </div>
+        <Doughnut
+            data={chartData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                },
+              },
+            }}
+        />
+      </div>
   );
 }
 

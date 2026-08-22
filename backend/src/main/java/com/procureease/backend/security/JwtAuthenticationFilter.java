@@ -2,6 +2,7 @@ package com.procureease.backend.security;
 
 import com.procureease.backend.service.CustomUserDetailsService;
 import com.procureease.backend.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,57 +29,72 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        // Get Authorization Header
         final String authHeader = request.getHeader("Authorization");
 
-        final String jwt;
-        final String userEmail;
-
-        // Check if Authorization Header is present
+        // If there is no Bearer token, continue normally
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract JWT Token
-        jwt = authHeader.substring(7);
+        try {
 
-        // Extract User Email from JWT
-        userEmail = jwtService.extractUsername(jwt);
+            String jwt = authHeader.substring(7);
 
-        // Authenticate only if not already authenticated
-        if (userEmail != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+            String userEmail = jwtService.extractUsername(jwt);
 
-            // Load User from Database
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(userEmail);
+            if (userEmail != null &&
+                    SecurityContextHolder.getContext()
+                            .getAuthentication() == null) {
 
-            // Validate Token
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(userEmail);
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                // Set Authentication in Security Context
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authToken);
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authToken);
+                }
             }
+
+        } catch (JwtException | IllegalArgumentException e) {
+
+            // Invalid, expired, or incorrectly signed token
+            SecurityContextHolder.clearContext();
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Invalid or expired token\"}"
+            );
+
+            return;
         }
 
-        // Continue the Filter Chain
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        return path.startsWith("/api/auth/");
     }
 }

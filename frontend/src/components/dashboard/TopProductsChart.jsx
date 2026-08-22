@@ -14,12 +14,12 @@ import {
 import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
 );
 
 function TopProductsChart() {
@@ -36,8 +36,9 @@ function TopProductsChart() {
     try {
       const response = await api.get("/dashboard/top-products");
 
-      const labels = response.data.data.map((item) => item.product);
-      const quantities = response.data.data.map((item) => item.quantity);
+      // Backend directly returns a List
+      const labels = response.data.map((item) => item.product);
+      const quantities = response.data.map((item) => item.quantity);
 
       setChartData({
         labels,
@@ -56,34 +57,34 @@ function TopProductsChart() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow mt-8">
-      <h2 className="text-2xl font-bold mb-6">
-        Top Products
-      </h2>
+      <div className="bg-white p-6 rounded-xl shadow mt-8">
+        <h2 className="text-2xl font-bold mb-6">
+          Top Products
+        </h2>
 
-      <Bar
-        data={chartData}
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "top",
-            },
-            title: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                precision: 0,
+        <Bar
+            data={chartData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                title: {
+                  display: false,
+                },
               },
-            },
-          },
-        }}
-      />
-    </div>
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    precision: 0,
+                  },
+                },
+              },
+            }}
+        />
+      </div>
   );
 }
 

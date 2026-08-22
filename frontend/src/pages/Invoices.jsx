@@ -16,19 +16,15 @@ function Invoices() {
   const { isAdmin, isManager } = useAuth();
 
   const [invoices, setInvoices] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
-
   const [editingId, setEditingId] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const invoicesPerPage = 5;
 
   const [formData, setFormData] = useState({
@@ -38,6 +34,10 @@ function Invoices() {
     status: "Pending",
     invoice: null,
   });
+
+  // ============================================================
+  // Fetch Invoices
+  // ============================================================
 
   useEffect(() => {
     fetchInvoices();
@@ -49,15 +49,21 @@ function Invoices() {
 
       const response = await getInvoices();
 
-      setInvoices(response.data);
+      console.log("Invoices:", response);
 
+      setInvoices(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching invoices:", error);
     } finally {
       setLoading(false);
     }
   };
-    const handleChange = (e) => {
+
+  // ============================================================
+  // Handle Input Change
+  // ============================================================
+
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     setFormData((prev) => ({
@@ -66,24 +72,33 @@ function Invoices() {
     }));
   };
 
+  // ============================================================
+  // Edit Invoice
+  // ============================================================
+
   const handleEdit = (invoice) => {
     setIsEditing(true);
     setEditingId(invoice.id);
 
     setFormData({
-      purchase_order_id: invoice.purchase_order_id,
-      invoice_number: invoice.invoice_number,
-      invoice_date: invoice.invoice_date?.split("T")[0],
-      status: invoice.status,
+      purchase_order_id: invoice.purchaseOrderId || "",
+      invoice_number: invoice.invoiceNumber || "",
+      invoice_date:
+          invoice.invoiceDate?.split("T")[0] || "",
+      status: invoice.status || "Pending",
       invoice: null,
     });
 
     setShowModal(true);
   };
 
+  // ============================================================
+  // Delete Invoice
+  // ============================================================
+
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this invoice?"
+        "Are you sure you want to delete this invoice?"
     );
 
     if (!confirmDelete) return;
@@ -91,39 +106,76 @@ function Invoices() {
     try {
       await deleteInvoice(id);
 
-      fetchInvoices();
-
+      await fetchInvoices();
     } catch (error) {
       console.error(error);
-      alert("Failed to delete invoice.");
+
+      alert(
+          error.response?.data?.message ||
+          "Failed to delete invoice."
+      );
     }
   };
+
+  // ============================================================
+  // Mark Invoice As Paid
+  // ============================================================
 
   const handleMarkPaid = async (id) => {
     try {
       await markInvoiceAsPaid(id, {
-        payment_method: "Cash",
-        transaction_id: `TXN-${Date.now()}`,
+        paymentMethod: "Cash",
+        transactionId: `TXN-${Date.now()}`,
       });
 
-      fetchInvoices();
+      await fetchInvoices();
 
     } catch (error) {
       console.error(error);
-      alert("Failed to mark invoice as paid.");
+
+      alert(
+          error.response?.data?.message ||
+          "Failed to mark invoice as paid."
+      );
     }
   };
+
+  // ============================================================
+  // Create / Update Invoice
+  // ============================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = new FormData();
 
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        data.append(key, formData[key]);
-      }
-    });
+    // Send field names matching Spring Boot DTO
+    data.append(
+        "purchaseOrderId",
+        formData.purchase_order_id
+    );
+
+    data.append(
+        "invoiceNumber",
+        formData.invoice_number
+    );
+
+    data.append(
+        "invoiceDate",
+        formData.invoice_date
+    );
+
+    data.append(
+        "status",
+        formData.status
+    );
+
+    if (formData.invoice) {
+      data.append(
+          "invoice",
+          formData.invoice
+      );
+    }
 
     try {
       if (isEditing) {
@@ -132,7 +184,7 @@ function Invoices() {
         await createInvoice(data);
       }
 
-      fetchInvoices();
+      await fetchInvoices();
 
       setFormData({
         purchase_order_id: "",
@@ -147,163 +199,176 @@ function Invoices() {
       setEditingId(null);
 
     } catch (error) {
-  console.error(error);
+      console.error(error);
 
-  console.log(error.response);
-
-  alert(
-    error.response?.data?.message ||
-    error.response?.data?.errors?.[0]?.msg ||
-    "Operation failed."
-  );
-}
+      alert(
+          error.response?.data?.message ||
+          error.response?.data?.errors?.[0]?.msg ||
+          "Operation failed."
+      );
+    }
   };
 
-  const filteredInvoices = useMemo(() => {
-    return invoices.filter((invoice) => {
-      const search = searchTerm.toLowerCase();
+  // ============================================================
+  // Search
+  // ============================================================
 
+  const filteredInvoices = useMemo(() => {
+    const search = searchTerm.toLowerCase();
+
+    return invoices.filter((invoice) => {
       return (
-        invoice.invoice_number
-          .toLowerCase()
-          .includes(search) ||
-        invoice.status
-          .toLowerCase()
-          .includes(search)
+          invoice.invoiceNumber
+              ?.toLowerCase()
+              .includes(search) ||
+          invoice.status
+              ?.toLowerCase()
+              .includes(search) ||
+          invoice.paymentStatus
+              ?.toLowerCase()
+              .includes(search)
       );
     });
   }, [invoices, searchTerm]);
 
+  // Reset page when searching
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
+  // ============================================================
+  // Pagination
+  // ============================================================
+
   const indexOfLastInvoice =
-    currentPage * invoicesPerPage;
+      currentPage * invoicesPerPage;
 
   const indexOfFirstInvoice =
-    indexOfLastInvoice - invoicesPerPage;
+      indexOfLastInvoice - invoicesPerPage;
 
   const currentInvoices =
-    filteredInvoices.slice(
-      indexOfFirstInvoice,
-      indexOfLastInvoice
-    );
+      filteredInvoices.slice(
+          indexOfFirstInvoice,
+          indexOfLastInvoice
+      );
 
   const totalPages = Math.ceil(
-    filteredInvoices.length / invoicesPerPage
+      filteredInvoices.length / invoicesPerPage
   );
 
   if (loading) {
     return <h2>Loading Invoices...</h2>;
   }
+
   return (
-  <div>
+      <div>
 
-    {/* Header */}
-    <div className="flex justify-between items-center mb-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
 
-      <h1 className="text-3xl font-bold">
-        Invoices
-      </h1>
+          <h1 className="text-3xl font-bold">
+            Invoices
+          </h1>
 
-      {(isAdmin || isManager) && (
-        <button
-          onClick={() => {
-            setIsEditing(false);
-            setEditingId(null);
+          {(isAdmin || isManager) && (
+              <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditingId(null);
 
-            setFormData({
-              purchase_order_id: "",
-              invoice_number: "",
-              invoice_date: "",
-              status: "Pending",
-              invoice: null,
-            });
+                    setFormData({
+                      purchase_order_id: "",
+                      invoice_number: "",
+                      invoice_date: "",
+                      status: "Pending",
+                      invoice: null,
+                    });
 
-            setShowModal(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-        >
-          + Add Invoice
-        </button>
-      )}
+                    setShowModal(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+              >
+                + Add Invoice
+              </button>
+          )}
 
-    </div>
+        </div>
 
-    {/* Search */}
-    <div className="mb-6">
+        {/* Search */}
+        <div className="mb-6">
 
-      <input
-        type="text"
-        placeholder="Search invoices..."
-        value={searchTerm}
-        onChange={(e) =>
-          setSearchTerm(e.target.value)
-        }
-        className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+          <input
+              type="text"
+              placeholder="Search invoices..."
+              value={searchTerm}
+              onChange={(e) =>
+                  setSearchTerm(e.target.value)
+              }
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
-    </div>
+        </div>
 
-    {/* Table */}
-    <InvoiceTable
-      invoices={currentInvoices}
-      handleEdit={handleEdit}
-      handleDelete={handleDelete}
-      handleMarkPaid={handleMarkPaid}
-      isAdmin={isAdmin}
-      isManager={isManager}
-    />
+        {/* Invoice Table */}
+        <InvoiceTable
+            invoices={currentInvoices}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleMarkPaid={handleMarkPaid}
+            isAdmin={isAdmin}
+            isManager={isManager}
+        />
 
-    {/* Pagination */}
-    {totalPages > 1 && (
+        {/* Pagination */}
+        {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-6">
 
-      <div className="flex justify-between items-center mt-6">
+              <button
+                  onClick={() =>
+                      setCurrentPage((prev) =>
+                          Math.max(prev - 1, 1)
+                      )
+                  }
+                  disabled={currentPage === 1}
+                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+              >
+                Previous
+              </button>
 
-        <button
-          onClick={() =>
-            setCurrentPage((prev) => prev - 1)
-          }
-          disabled={currentPage === 1}
-          className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-        >
-          Previous
-        </button>
+              <span className="font-semibold">
+            Page {currentPage} of {totalPages}
+          </span>
 
-        <span className="font-semibold">
-          Page {currentPage} of {totalPages}
-        </span>
+              <button
+                  onClick={() =>
+                      setCurrentPage((prev) =>
+                          Math.min(prev + 1, totalPages)
+                      )
+                  }
+                  disabled={currentPage === totalPages}
+                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+              >
+                Next
+              </button>
 
-        <button
-          onClick={() =>
-            setCurrentPage((prev) => prev + 1)
-          }
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-        >
-          Next
-        </button>
+            </div>
+        )}
+
+        {/* Invoice Modal */}
+        <InvoiceModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            setEditingId={setEditingId}
+        />
 
       </div>
-
-    )}
-
-    {/* Modal */}
-    <InvoiceModal
-      showModal={showModal}
-      setShowModal={setShowModal}
-      formData={formData}
-      setFormData={setFormData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      isEditing={isEditing}
-      setIsEditing={setIsEditing}
-      setEditingId={setEditingId}
-    />
-
-  </div>
-);
+  );
 }
 
 export default Invoices;

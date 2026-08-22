@@ -13,14 +13,27 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final Path productUploadDirectory =
-            Paths.get("uploads/products");
+    private final Path productUploadDirectory;
 
     public FileStorageService() {
 
+        productUploadDirectory =
+                Paths.get(
+                        System.getProperty("user.dir"),
+                        "uploads",
+                        "products"
+                ).toAbsolutePath().normalize();
+
         try {
             Files.createDirectories(productUploadDirectory);
+
+            System.out.println(
+                    "Product upload directory: "
+                            + productUploadDirectory
+            );
+
         } catch (IOException e) {
+
             throw new RuntimeException(
                     "Could not create upload directory",
                     e
@@ -38,7 +51,8 @@ public class FileStorageService {
             return null;
         }
 
-        String originalFilename = file.getOriginalFilename();
+        String originalFilename =
+                file.getOriginalFilename();
 
         if (originalFilename == null ||
                 !originalFilename.contains(".")) {
@@ -48,7 +62,6 @@ public class FileStorageService {
             );
         }
 
-        // Get file extension
         String extension =
                 originalFilename
                         .substring(
@@ -56,7 +69,6 @@ public class FileStorageService {
                         )
                         .toLowerCase(Locale.ROOT);
 
-        // Check extension
         if (!(extension.equals("jpg")
                 || extension.equals("jpeg")
                 || extension.equals("png")
@@ -67,7 +79,6 @@ public class FileStorageService {
             );
         }
 
-        // Check file size
         if (file.getSize() > 5 * 1024 * 1024) {
 
             throw new IllegalArgumentException(
@@ -75,16 +86,24 @@ public class FileStorageService {
             );
         }
 
-        // Generate unique filename
         String filename =
                 UUID.randomUUID() + "." + extension;
 
         try {
 
             Path targetPath =
-                    productUploadDirectory.resolve(filename);
+                    productUploadDirectory
+                            .resolve(filename)
+                            .normalize();
 
-            file.transferTo(targetPath);
+            file.transferTo(
+                    targetPath.toFile()
+            );
+
+            System.out.println(
+                    "Image saved successfully: "
+                            + targetPath
+            );
 
             return filename;
 

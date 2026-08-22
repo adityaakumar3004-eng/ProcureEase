@@ -1,24 +1,24 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://procureease-backend.onrender.com/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL: "http://localhost:5000/api",
 });
 
-// Automatically attach JWT token to every request
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
+    (config) => {
+        const token = localStorage.getItem("token");
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+        const isAuthRequest =
+            config.url?.includes("/auth/login") ||
+            config.url?.includes("/auth/register");
 
-    return config;
-  },
-  (error) => Promise.reject(error)
+        if (token && !isAuthRequest) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        return config;
+    },
+    (error) => Promise.reject(error)
 );
 
 export default api;
