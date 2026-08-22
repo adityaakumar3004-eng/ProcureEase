@@ -9,6 +9,12 @@ import {
   markInvoiceAsPaid,
 } from "../services/invoiceService";
 
+import {
+  exportInvoicesCSV,
+  exportInvoicesExcel,
+  exportInvoicesPDF,
+} from "../services/exportService";
+
 import InvoiceModal from "../components/invoices/InvoiceModal";
 import InvoiceTable from "../components/invoices/InvoiceTable";
 
@@ -52,8 +58,13 @@ function Invoices() {
       console.log("Invoices:", response);
 
       setInvoices(response.data || []);
+
     } catch (error) {
-      console.error("Error fetching invoices:", error);
+      console.error(
+          "Error fetching invoices:",
+          error
+      );
+
     } finally {
       setLoading(false);
     }
@@ -78,14 +89,22 @@ function Invoices() {
 
   const handleEdit = (invoice) => {
     setIsEditing(true);
+
     setEditingId(invoice.id);
 
     setFormData({
-      purchase_order_id: invoice.purchaseOrderId || "",
-      invoice_number: invoice.invoiceNumber || "",
+      purchase_order_id:
+          invoice.purchaseOrderId || "",
+
+      invoice_number:
+          invoice.invoiceNumber || "",
+
       invoice_date:
           invoice.invoiceDate?.split("T")[0] || "",
-      status: invoice.status || "Pending",
+
+      status:
+          invoice.status || "Pending",
+
       invoice: null,
     });
 
@@ -107,6 +126,7 @@ function Invoices() {
       await deleteInvoice(id);
 
       await fetchInvoices();
+
     } catch (error) {
       console.error(error);
 
@@ -149,7 +169,6 @@ function Invoices() {
 
     const data = new FormData();
 
-    // Send field names matching Spring Boot DTO
     data.append(
         "purchaseOrderId",
         formData.purchase_order_id
@@ -179,7 +198,10 @@ function Invoices() {
 
     try {
       if (isEditing) {
-        await updateInvoice(editingId, data);
+        await updateInvoice(
+            editingId,
+            data
+        );
       } else {
         await createInvoice(data);
       }
@@ -214,24 +236,34 @@ function Invoices() {
   // ============================================================
 
   const filteredInvoices = useMemo(() => {
-    const search = searchTerm.toLowerCase();
+    const search =
+        searchTerm.toLowerCase();
 
     return invoices.filter((invoice) => {
       return (
           invoice.invoiceNumber
               ?.toLowerCase()
               .includes(search) ||
+
           invoice.status
               ?.toLowerCase()
               .includes(search) ||
+
           invoice.paymentStatus
               ?.toLowerCase()
               .includes(search)
       );
     });
-  }, [invoices, searchTerm]);
 
-  // Reset page when searching
+  }, [
+    invoices,
+    searchTerm,
+  ]);
+
+  // ============================================================
+  // Reset Page When Searching
+  // ============================================================
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -244,7 +276,8 @@ function Invoices() {
       currentPage * invoicesPerPage;
 
   const indexOfFirstInvoice =
-      indexOfLastInvoice - invoicesPerPage;
+      indexOfLastInvoice -
+      invoicesPerPage;
 
   const currentInvoices =
       filteredInvoices.slice(
@@ -253,48 +286,88 @@ function Invoices() {
       );
 
   const totalPages = Math.ceil(
-      filteredInvoices.length / invoicesPerPage
+      filteredInvoices.length /
+      invoicesPerPage
   );
 
   if (loading) {
-    return <h2>Loading Invoices...</h2>;
+    return (
+        <h2>
+          Loading Invoices...
+        </h2>
+    );
   }
 
   return (
       <div>
 
         {/* Header */}
+
         <div className="flex justify-between items-center mb-6">
 
           <h1 className="text-3xl font-bold">
             Invoices
           </h1>
 
-          {(isAdmin || isManager) && (
-              <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditingId(null);
+          <div className="flex items-center gap-3">
 
-                    setFormData({
-                      purchase_order_id: "",
-                      invoice_number: "",
-                      invoice_date: "",
-                      status: "Pending",
-                      invoice: null,
-                    });
+            {/* Export CSV */}
 
-                    setShowModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-              >
-                + Add Invoice
-              </button>
-          )}
+            <button
+                onClick={exportInvoicesCSV}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export CSV
+            </button>
+
+            {/* Export Excel */}
+
+            <button
+                onClick={exportInvoicesExcel}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export Excel
+            </button>
+
+            {/* Export PDF */}
+
+            <button
+                onClick={exportInvoicesPDF}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export PDF
+            </button>
+
+            {/* Add Invoice */}
+
+            {(isAdmin || isManager) && (
+                <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditingId(null);
+
+                      setFormData({
+                        purchase_order_id: "",
+                        invoice_number: "",
+                        invoice_date: "",
+                        status: "Pending",
+                        invoice: null,
+                      });
+
+                      setShowModal(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                >
+                  + Add Invoice
+                </button>
+            )}
+
+          </div>
 
         </div>
 
         {/* Search */}
+
         <div className="mb-6">
 
           <input
@@ -310,6 +383,7 @@ function Invoices() {
         </div>
 
         {/* Invoice Table */}
+
         <InvoiceTable
             invoices={currentInvoices}
             handleEdit={handleEdit}
@@ -320,13 +394,18 @@ function Invoices() {
         />
 
         {/* Pagination */}
+
         {totalPages > 1 && (
+
             <div className="flex justify-between items-center mt-6">
 
               <button
                   onClick={() =>
                       setCurrentPage((prev) =>
-                          Math.max(prev - 1, 1)
+                          Math.max(
+                              prev - 1,
+                              1
+                          )
                       )
                   }
                   disabled={currentPage === 1}
@@ -342,19 +421,26 @@ function Invoices() {
               <button
                   onClick={() =>
                       setCurrentPage((prev) =>
-                          Math.min(prev + 1, totalPages)
+                          Math.min(
+                              prev + 1,
+                              totalPages
+                          )
                       )
                   }
-                  disabled={currentPage === totalPages}
+                  disabled={
+                      currentPage === totalPages
+                  }
                   className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
               >
                 Next
               </button>
 
             </div>
+
         )}
 
         {/* Invoice Modal */}
+
         <InvoiceModal
             showModal={showModal}
             setShowModal={setShowModal}

@@ -6,9 +6,15 @@ function SaleModal({
                        handleSubmit,
                        products,
                    }) {
+
     if (!showModal) {
         return null;
     }
+
+    const selectedProduct = products.find(
+        (product) =>
+            product.id === Number(formData.productId)
+    );
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -31,7 +37,6 @@ function SaleModal({
 
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit}>
 
                     {/* Product */}
@@ -66,6 +71,42 @@ function SaleModal({
 
                     </div>
 
+                    {/* Product Information */}
+                    {selectedProduct && (
+
+                        <div className="mb-4 bg-gray-50 border rounded-lg p-4">
+
+                            <div className="flex justify-between mb-2">
+
+                                <span className="text-gray-600">
+                                    Available Stock:
+                                </span>
+
+                                <span className="font-semibold">
+                                    {selectedProduct.stock}
+                                </span>
+
+                            </div>
+
+                            <div className="flex justify-between">
+
+                                <span className="text-gray-600">
+                                    Product Price:
+                                </span>
+
+                                <span className="font-semibold">
+                                    ₹
+                                    {Number(
+                                        selectedProduct.price
+                                    ).toLocaleString()}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    )}
+
                     {/* Quantity */}
                     <div className="mb-6">
 
@@ -79,12 +120,51 @@ function SaleModal({
                             value={formData.quantity}
                             onChange={handleChange}
                             min="1"
+                            max={
+                                selectedProduct
+                                    ? selectedProduct.stock
+                                    : undefined
+                            }
                             required
                             placeholder="Enter quantity"
                             className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
 
+                        {selectedProduct && (
+                            <p className="text-sm text-gray-500 mt-2">
+                                Maximum available quantity:{" "}
+                                {selectedProduct.stock}
+                            </p>
+                        )}
+
                     </div>
+
+                    {/* Estimated Total */}
+                    {selectedProduct &&
+                        formData.quantity &&
+                        Number(formData.quantity) > 0 && (
+
+                            <div className="mb-6 bg-blue-50 border border-blue-100 rounded-lg p-4">
+
+                                <div className="flex justify-between">
+
+                                <span className="font-medium">
+                                    Estimated Total
+                                </span>
+
+                                    <span className="font-bold text-lg">
+                                    ₹
+                                        {(
+                                            Number(selectedProduct.price) *
+                                            Number(formData.quantity)
+                                        ).toLocaleString()}
+                                </span>
+
+                                </div>
+
+                            </div>
+
+                        )}
 
                     {/* Buttons */}
                     <div className="flex justify-end gap-3">

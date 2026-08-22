@@ -8,6 +8,12 @@ import {
   deleteProduct,
 } from "../services/productService";
 
+import {
+  exportProductsCSV,
+  exportProductsExcel,
+  exportProductsPDF,
+} from "../services/exportService";
+
 import { getVendors } from "../services/vendorService";
 
 import ProductTable from "../components/products/ProductTable";
@@ -44,7 +50,6 @@ function Products() {
     limit: 5,
   });
 
-  // Separate input states for price filters
   const [minPriceInput, setMinPriceInput] = useState("");
   const [maxPriceInput, setMaxPriceInput] = useState("");
 
@@ -108,8 +113,6 @@ function Products() {
       setLoading(true);
 
       const response = await getProducts(filters);
-
-      console.log("Products:", response);
 
       setProducts(response.data);
 
@@ -195,12 +198,16 @@ function Products() {
       const submitData = new FormData();
 
       submitData.append("name", formData.name);
+
       submitData.append(
           "description",
           formData.description
       );
+
       submitData.append("price", formData.price);
+
       submitData.append("stock", formData.stock);
+
       submitData.append(
           "vendorId",
           formData.vendor_id
@@ -242,6 +249,37 @@ function Products() {
     }
   };
 
+  // ============================
+  // Export Handlers
+  // ============================
+
+  const handleExportCSV = async () => {
+    try {
+      await exportProductsCSV();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export products as CSV.");
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportProductsExcel();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export products as Excel.");
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      await exportProductsPDF();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export products as PDF.");
+    }
+  };
+
   const updateFilter = (key, value) => {
     setFilters((prev) => ({
       ...prev,
@@ -274,40 +312,70 @@ function Products() {
 
   return (
       <div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
+
           <h1 className="text-3xl font-bold">
             Products
           </h1>
 
-          {(isAdmin || isManager) && (
-              <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditingId(null);
+          <div className="flex gap-2">
 
-                    setFormData({
-                      name: "",
-                      description: "",
-                      price: "",
-                      stock: "",
-                      vendor_id: "",
-                      productImage: null,
-                    });
+            {/* Export CSV */}
+            <button
+                onClick={handleExportCSV}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export CSV
+            </button>
 
-                    setShowModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-              >
-                + Add Product
-              </button>
-          )}
+            {/* Export Excel */}
+            <button
+                onClick={handleExportExcel}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export Excel
+            </button>
+
+            {/* Export PDF */}
+            <button
+                onClick={handleExportPDF}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export PDF
+            </button>
+
+            {/* Add Product */}
+            {(isAdmin || isManager) && (
+                <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditingId(null);
+
+                      setFormData({
+                        name: "",
+                        description: "",
+                        price: "",
+                        stock: "",
+                        vendor_id: "",
+                        productImage: null,
+                      });
+
+                      setShowModal(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                >
+                  + Add Product
+                </button>
+            )}
+
+          </div>
         </div>
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
 
-          {/* Search */}
           <input
               type="text"
               placeholder="Search..."
@@ -321,7 +389,6 @@ function Products() {
               className="border rounded-lg p-2"
           />
 
-          {/* Vendor */}
           <select
               value={filters.vendorId}
               onChange={(e) =>
@@ -346,7 +413,6 @@ function Products() {
             ))}
           </select>
 
-          {/* Minimum Price */}
           <input
               type="number"
               placeholder="Min Price"
@@ -359,7 +425,6 @@ function Products() {
               className="border rounded-lg p-2"
           />
 
-          {/* Maximum Price */}
           <input
               type="number"
               placeholder="Max Price"
@@ -372,7 +437,6 @@ function Products() {
               className="border rounded-lg p-2"
           />
 
-          {/* Sort By */}
           <select
               value={filters.sortBy}
               onChange={(e) =>
@@ -396,7 +460,6 @@ function Products() {
             </option>
           </select>
 
-          {/* Sort Order */}
           <select
               value={filters.order}
               onChange={(e) =>

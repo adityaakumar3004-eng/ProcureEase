@@ -7,6 +7,12 @@ import {
   updatePurchaseOrderStatus,
 } from "../services/purchaseOrderService";
 
+import {
+  exportPurchaseOrdersCSV,
+  exportPurchaseOrdersExcel,
+  exportPurchaseOrdersPDF,
+} from "../services/exportService";
+
 import { getVendors } from "../services/vendorService";
 import { getProducts } from "../services/productService";
 
@@ -58,7 +64,10 @@ function PurchaseOrders() {
 
       setPurchaseOrders(response.data || []);
     } catch (error) {
-      console.error("Error fetching purchase orders:", error);
+      console.error(
+          "Error fetching purchase orders:",
+          error
+      );
     } finally {
       setLoading(false);
     }
@@ -74,7 +83,10 @@ function PurchaseOrders() {
 
       setVendors(response.data || []);
     } catch (error) {
-      console.error("Error fetching vendors:", error);
+      console.error(
+          "Error fetching vendors:",
+          error
+      );
     }
   };
 
@@ -91,7 +103,44 @@ function PurchaseOrders() {
 
       setProducts(response.data || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error(
+          "Error fetching products:",
+          error
+      );
+    }
+  };
+
+  // ==========================================
+  // Export Handlers
+  // ==========================================
+
+  const handleExportCSV = async () => {
+    try {
+      await exportPurchaseOrdersCSV();
+    } catch (error) {
+      console.error(error);
+
+      alert("Failed to export Purchase Orders as CSV.");
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportPurchaseOrdersExcel();
+    } catch (error) {
+      console.error(error);
+
+      alert("Failed to export Purchase Orders as Excel.");
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      await exportPurchaseOrdersPDF();
+    } catch (error) {
+      console.error(error);
+
+      alert("Failed to export Purchase Orders as PDF.");
     }
   };
 
@@ -115,7 +164,11 @@ function PurchaseOrders() {
   // Purchase Order Item Change
   // ==========================================
 
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = (
+      index,
+      field,
+      value
+  ) => {
     const updatedItems = [...formData.items];
 
     updatedItems[index] = {
@@ -155,7 +208,9 @@ function PurchaseOrders() {
 
     setFormData((prev) => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index),
+      items: prev.items.filter(
+          (_, i) => i !== index
+      ),
     }));
   };
 
@@ -176,7 +231,9 @@ function PurchaseOrders() {
         })),
       };
 
-      await createPurchaseOrder(purchaseOrderData);
+      await createPurchaseOrder(
+          purchaseOrderData
+      );
 
       await fetchPurchaseOrders();
 
@@ -205,9 +262,15 @@ function PurchaseOrders() {
   // Update Purchase Order Status
   // ==========================================
 
-  const handleStatusUpdate = async (id, status) => {
+  const handleStatusUpdate = async (
+      id,
+      status
+  ) => {
     try {
-      await updatePurchaseOrderStatus(id, status);
+      await updatePurchaseOrderStatus(
+          id,
+          status
+      );
 
       await fetchPurchaseOrders();
     } catch (error) {
@@ -229,8 +292,12 @@ function PurchaseOrders() {
 
     return purchaseOrders.filter((order) => {
       return (
-          order.vendorName?.toLowerCase().includes(search) ||
-          order.status?.toLowerCase().includes(search) ||
+          order.vendorName
+              ?.toLowerCase()
+              .includes(search) ||
+          order.status
+              ?.toLowerCase()
+              .includes(search) ||
           String(order.id).includes(search)
       );
     });
@@ -249,7 +316,8 @@ function PurchaseOrders() {
       currentPage * purchaseOrdersPerPage;
 
   const indexOfFirstOrder =
-      indexOfLastOrder - purchaseOrdersPerPage;
+      indexOfLastOrder -
+      purchaseOrdersPerPage;
 
   const currentOrders =
       filteredPurchaseOrders.slice(
@@ -276,26 +344,55 @@ function PurchaseOrders() {
             Purchase Orders
           </h1>
 
-          {(isAdmin || isManager) && (
-              <button
-                  onClick={() => {
-                    setFormData({
-                      vendorId: "",
-                      items: [
-                        {
-                          productId: "",
-                          quantity: "",
-                        },
-                      ],
-                    });
+          <div className="flex items-center gap-3">
 
-                    setShowModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-              >
-                + Create Purchase Order
-              </button>
-          )}
+            {/* Export CSV */}
+            <button
+                onClick={handleExportCSV}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export CSV
+            </button>
+
+            {/* Export Excel */}
+            <button
+                onClick={handleExportExcel}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export Excel
+            </button>
+
+            {/* Export PDF */}
+            <button
+                onClick={handleExportPDF}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            >
+              Export PDF
+            </button>
+
+            {/* Create Purchase Order */}
+            {(isAdmin || isManager) && (
+                <button
+                    onClick={() => {
+                      setFormData({
+                        vendorId: "",
+                        items: [
+                          {
+                            productId: "",
+                            quantity: "",
+                          },
+                        ],
+                      });
+
+                      setShowModal(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                >
+                  + Create Purchase Order
+                </button>
+            )}
+
+          </div>
 
         </div>
 

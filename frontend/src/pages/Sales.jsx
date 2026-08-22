@@ -8,6 +8,12 @@ import {
 
 import { getProducts } from "../services/productService";
 
+import {
+    exportSalesCSV,
+    exportSalesExcel,
+    exportSalesPDF,
+} from "../services/exportService";
+
 import SalesTable from "../components/sales/SalesTable";
 import SaleModal from "../components/sales/SaleModal";
 
@@ -23,6 +29,7 @@ function Sales() {
     const [searchTerm, setSearchTerm] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
+
     const salesPerPage = 5;
 
     const [formData, setFormData] = useState({
@@ -35,31 +42,44 @@ function Sales() {
         fetchProducts();
     }, []);
 
+    // ============================================================
+    // Fetch Sales
+    // ============================================================
+
     const fetchSales = async () => {
         try {
             setLoading(true);
 
             const response = await getSales();
 
-            console.log("Sales:", response);
-
             setSales(response.data);
+
         } catch (error) {
             console.error(error);
+
         } finally {
             setLoading(false);
         }
     };
+
+    // ============================================================
+    // Fetch Products
+    // ============================================================
 
     const fetchProducts = async () => {
         try {
             const response = await getProducts();
 
             setProducts(response.data);
+
         } catch (error) {
             console.error(error);
         }
     };
+
+    // ============================================================
+    // Handle Form Change
+    // ============================================================
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -70,8 +90,33 @@ function Sales() {
         }));
     };
 
+    // ============================================================
+    // Create Sale
+    // ============================================================
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const selectedProduct = products.find(
+            (product) =>
+                product.id === Number(formData.productId)
+        );
+
+        if (!selectedProduct) {
+            alert("Please select a product.");
+            return;
+        }
+
+        if (
+            Number(formData.quantity) >
+            selectedProduct.stock
+        ) {
+            alert(
+                `Only ${selectedProduct.stock} items are available in stock.`
+            );
+
+            return;
+        }
 
         try {
             await createSale({
@@ -99,6 +144,38 @@ function Sales() {
         }
     };
 
+    // ============================================================
+    // Export Sales
+    // ============================================================
+
+    const handleExportCSV = async () => {
+        try {
+            await exportSalesCSV();
+        } catch (error) {
+            alert("Failed to export sales as CSV.");
+        }
+    };
+
+    const handleExportExcel = async () => {
+        try {
+            await exportSalesExcel();
+        } catch (error) {
+            alert("Failed to export sales as Excel.");
+        }
+    };
+
+    const handleExportPDF = async () => {
+        try {
+            await exportSalesPDF();
+        } catch (error) {
+            alert("Failed to export sales as PDF.");
+        }
+    };
+
+    // ============================================================
+    // Search
+    // ============================================================
+
     const filteredSales = useMemo(() => {
         const search = searchTerm.toLowerCase();
 
@@ -112,6 +189,10 @@ function Sales() {
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
+
+    // ============================================================
+    // Pagination
+    // ============================================================
 
     const indexOfLastSale =
         currentPage * salesPerPage;
@@ -143,21 +224,50 @@ function Sales() {
                     Sales
                 </h1>
 
-                {(isAdmin || isManager) && (
-                    <button
-                        onClick={() => {
-                            setFormData({
-                                productId: "",
-                                quantity: "",
-                            });
+                <div className="flex gap-3">
 
-                            setShowModal(true);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                    {/* Export CSV */}
+                    <button
+                        onClick={handleExportCSV}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
                     >
-                        + Record Sale
+                        Export CSV
                     </button>
-                )}
+
+                    {/* Export Excel */}
+                    <button
+                        onClick={handleExportExcel}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                    >
+                        Export Excel
+                    </button>
+
+                    {/* Export PDF */}
+                    <button
+                        onClick={handleExportPDF}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                    >
+                        Export PDF
+                    </button>
+
+                    {/* Record Sale */}
+                    {(isAdmin || isManager) && (
+                        <button
+                            onClick={() => {
+                                setFormData({
+                                    productId: "",
+                                    quantity: "",
+                                });
+
+                                setShowModal(true);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                        >
+                            + Record Sale
+                        </button>
+                    )}
+
+                </div>
 
             </div>
 
@@ -195,8 +305,8 @@ function Sales() {
                     </button>
 
                     <span className="font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
+                        Page {currentPage} of {totalPages}
+                    </span>
 
                     <button
                         onClick={() =>
