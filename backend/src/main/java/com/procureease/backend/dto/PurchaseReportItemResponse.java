@@ -14,6 +14,8 @@ public class PurchaseReportItemResponse {
 
     private Integer vendorId;
 
+    private String vendorName;
+
     private BigDecimal totalAmount;
 
     private String status;

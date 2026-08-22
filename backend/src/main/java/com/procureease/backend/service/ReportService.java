@@ -7,6 +7,7 @@ import com.procureease.backend.entity.Sale;
 import com.procureease.backend.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +22,7 @@ public class ReportService {
     // Sales Report
     // ============================================================
 
+    @Transactional(readOnly = true)
     public SalesReportResponse getSalesReport() {
 
         long totalSales =
@@ -52,6 +54,7 @@ public class ReportService {
     // Purchase Report
     // ============================================================
 
+    @Transactional(readOnly = true)
     public PurchaseReportResponse getPurchaseReport() {
 
         long totalPurchaseOrders =
@@ -100,6 +103,7 @@ public class ReportService {
     // Inventory Report
     // ============================================================
 
+    @Transactional(readOnly = true)
     public InventoryReportResponse getInventoryReport() {
 
         BigDecimal inventoryValue =
@@ -107,7 +111,11 @@ public class ReportService {
 
         InventoryValueResponse inventoryValueResponse =
                 InventoryValueResponse.builder()
-                        .inventoryValue(inventoryValue)
+                        .inventoryValue(
+                                inventoryValue != null
+                                        ? inventoryValue
+                                        : BigDecimal.ZERO
+                        )
                         .build();
 
         List<LowStockProductResponse> lowStock =
@@ -135,6 +143,7 @@ public class ReportService {
     // Vendor Report
     // ============================================================
 
+    @Transactional(readOnly = true)
     public List<VendorReportItemResponse> getVendorReport() {
 
         return reportRepository
@@ -171,14 +180,27 @@ public class ReportService {
     ) {
 
         return SalesReportItemResponse.builder()
-                .id(sale.getId())
+                .id(
+                        sale.getId()
+                )
                 .productId(
                         sale.getProduct().getId()
                 )
-                .quantity(sale.getQuantity())
-                .price(sale.getPrice())
-                .totalAmount(sale.getTotalAmount())
-                .createdAt(sale.getCreatedAt())
+                .productName(
+                        sale.getProduct().getName()
+                )
+                .quantity(
+                        sale.getQuantity()
+                )
+                .price(
+                        sale.getPrice()
+                )
+                .totalAmount(
+                        sale.getTotalAmount()
+                )
+                .createdAt(
+                        sale.getCreatedAt()
+                )
                 .build();
     }
 
@@ -191,9 +213,18 @@ public class ReportService {
     ) {
 
         return PurchaseReportItemResponse.builder()
-                .id(purchaseOrder.getId())
+                .id(
+                        purchaseOrder.getId()
+                )
                 .vendorId(
-                        purchaseOrder.getVendor().getId()
+                        purchaseOrder
+                                .getVendor()
+                                .getId()
+                )
+                .vendorName(
+                        purchaseOrder
+                                .getVendor()
+                                .getName()
                 )
                 .totalAmount(
                         purchaseOrder.getTotalAmount()
@@ -216,9 +247,15 @@ public class ReportService {
     ) {
 
         return LowStockProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .stock(product.getStock())
+                .id(
+                        product.getId()
+                )
+                .name(
+                        product.getName()
+                )
+                .stock(
+                        product.getStock()
+                )
                 .build();
     }
 
@@ -231,10 +268,18 @@ public class ReportService {
     ) {
 
         return InventoryProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .stock(product.getStock())
-                .price(product.getPrice())
+                .id(
+                        product.getId()
+                )
+                .name(
+                        product.getName()
+                )
+                .stock(
+                        product.getStock()
+                )
+                .price(
+                        product.getPrice()
+                )
                 .build();
     }
 }

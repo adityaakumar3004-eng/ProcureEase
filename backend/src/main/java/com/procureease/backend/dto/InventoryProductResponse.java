@@ -13,7 +13,13 @@ public class InventoryProductResponse {
 
     private String name;
 
+    private Integer vendorId;
+
+    private String vendorName;
+
     private Integer stock;
 
     private BigDecimal price;
+
+    private BigDecimal totalValue;
 }

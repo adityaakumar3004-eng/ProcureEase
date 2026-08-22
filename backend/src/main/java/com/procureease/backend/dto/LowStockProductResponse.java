@@ -13,5 +13,9 @@ public class LowStockProductResponse {
 
     private String name;
 
+    private Integer vendorId;
+
+    private String vendorName;
+
     private Integer stock;
 }
