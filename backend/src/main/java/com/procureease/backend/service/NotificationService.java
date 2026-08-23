@@ -35,12 +35,13 @@ public class NotificationService {
             String type
     ) {
 
-        Notification notification = Notification.builder()
-                .title(title)
-                .message(message)
-                .type(type)
-                .isRead(false)
-                .build();
+        Notification notification =
+                Notification.builder()
+                        .title(title)
+                        .message(message)
+                        .type(type)
+                        .isRead(false)
+                        .build();
 
         Notification savedNotification =
                 notificationRepository.save(notification);
@@ -55,10 +56,32 @@ public class NotificationService {
     public List<NotificationResponse> getAllNotifications() {
 
         return notificationRepository
-                .findAll()
+                .findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    // ============================================================
+    // Get Unread Notifications
+    // ============================================================
+
+    public List<NotificationResponse> getUnreadNotifications() {
+
+        return notificationRepository
+                .findByIsReadFalseOrderByCreatedAtDesc()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ============================================================
+    // Get Unread Notification Count
+    // ============================================================
+
+    public long getUnreadNotificationCount() {
+
+        return notificationRepository.countByIsReadFalse();
     }
 
     // ============================================================
@@ -68,7 +91,8 @@ public class NotificationService {
     public void markNotificationAsRead(Integer id) {
 
         Notification notification =
-                notificationRepository.findById(id)
+                notificationRepository
+                        .findById(id)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Notification not found"
@@ -81,13 +105,30 @@ public class NotificationService {
     }
 
     // ============================================================
+    // Mark All Notifications As Read
+    // ============================================================
+
+    public void markAllNotificationsAsRead() {
+
+        List<Notification> notifications =
+                notificationRepository.findByIsReadFalseOrderByCreatedAtDesc();
+
+        for (Notification notification : notifications) {
+            notification.setIsRead(true);
+        }
+
+        notificationRepository.saveAll(notifications);
+    }
+
+    // ============================================================
     // Delete Notification
     // ============================================================
 
     public void deleteNotification(Integer id) {
 
         Notification notification =
-                notificationRepository.findById(id)
+                notificationRepository
+                        .findById(id)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Notification not found"

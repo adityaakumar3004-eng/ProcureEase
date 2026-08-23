@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface ProductRepository
+        extends JpaRepository<Product, Integer> {
 
     // ============================================================
     // Search + Filter + Pagination
@@ -56,6 +57,19 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findProductWithVendorById(
             @Param("id") Integer id
     );
+
+    // ============================================================
+    // Get All Products With Vendor
+    // Export Feature
+    // ============================================================
+
+    @Query("""
+            SELECT p
+            FROM Product p
+            JOIN FETCH p.vendor
+            ORDER BY p.id ASC
+            """)
+    List<Product> findAllWithVendor();
 
     // ============================================================
     // Dashboard - Inventory Value

@@ -22,7 +22,8 @@ public class NotificationController {
     // ============================================================
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllNotifications() {
+    public ResponseEntity<Map<String, Object>>
+    getAllNotifications() {
 
         List<NotificationResponse> notifications =
                 notificationService.getAllNotifications();
@@ -33,6 +34,48 @@ public class NotificationController {
         response.put("success", true);
         response.put("count", notifications.size());
         response.put("data", notifications);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
+    // Get Unread Notifications
+    // ============================================================
+
+    @GetMapping("/unread")
+    public ResponseEntity<Map<String, Object>>
+    getUnreadNotifications() {
+
+        List<NotificationResponse> notifications =
+                notificationService.getUnreadNotifications();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+        response.put("count", notifications.size());
+        response.put("data", notifications);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
+    // Get Unread Notification Count
+    // ============================================================
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Object>>
+    getUnreadNotificationCount() {
+
+        long count =
+                notificationService
+                        .getUnreadNotificationCount();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+        response.put("count", count);
 
         return ResponseEntity.ok(response);
     }
@@ -98,7 +141,8 @@ public class NotificationController {
     // ============================================================
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Map<String, Object>> markNotificationAsRead(
+    public ResponseEntity<Map<String, Object>>
+    markNotificationAsRead(
             @PathVariable Integer id
     ) {
 
@@ -117,11 +161,36 @@ public class NotificationController {
     }
 
     // ============================================================
+    // Mark All Notifications As Read
+    // ============================================================
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Map<String, Object>>
+    markAllNotificationsAsRead() {
+
+        notificationService
+                .markAllNotificationsAsRead();
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put("success", true);
+
+        response.put(
+                "message",
+                "All notifications marked as read."
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
     // Delete Notification
     // ============================================================
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> deleteNotification(
+    public ResponseEntity<Map<String, Object>>
+    deleteNotification(
             @PathVariable Integer id
     ) {
 
@@ -131,6 +200,7 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Notification deleted successfully."
@@ -164,11 +234,14 @@ public class NotificationController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Purchase update notification created successfully."
         );
 
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity
+                .status(201)
+                .body(response);
     }
 }

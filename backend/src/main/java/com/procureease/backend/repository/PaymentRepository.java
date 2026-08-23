@@ -15,6 +15,7 @@ public interface PaymentRepository
             JOIN FETCH i.purchaseOrder po
             JOIN FETCH po.vendor
             WHERE i.paymentStatus = :paymentStatus
+            ORDER BY i.paymentDate DESC
             """)
     List<Invoice> findByPaymentStatus(
             String paymentStatus
