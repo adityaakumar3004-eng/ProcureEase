@@ -37,7 +37,7 @@ function Login() {
       navigate("/dashboard");
     } catch (err) {
       setError(
-        err.response?.data?.message ||
+          err.response?.data?.message ||
           "Login failed. Please try again."
       );
     } finally {
@@ -46,79 +46,98 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
 
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
-          ProcureEase
-        </h1>
+          <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
+            ProcureEase
+          </h1>
 
-        <p className="text-center text-gray-500 mb-8">
-          Login to your account
-        </p>
+          <p className="text-center text-gray-500 mb-8">
+            Login to your account
+          </p>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+          {error && (
+              <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
+                {error}
+              </div>
+          )}
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
 
-          <div className="mb-4">
-            <label className="block mb-2 font-medium">
-              Email
-            </label>
+            {/* Email */}
 
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              required
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            <div className="mb-4">
+              <label className="block mb-2 font-medium">
+                Email
+              </label>
 
-          <div className="mb-6">
-            <label className="block mb-2 font-medium">
-              Password
-            </label>
+              <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email"
+                  required
+                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              required
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            {/* Password */}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+            <div className="mb-2">
+              <label className="block mb-2 font-medium">
+                Password
+              </label>
 
-        </form>
+              <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter password"
+                  required
+                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-        <p className="mt-6 text-center text-sm">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-600 hover:underline"
-          >
-            Register
-          </Link>
-        </p>
+            {/* Forgot Password */}
 
+            <div className="text-right mb-6">
+              <Link
+                  to="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            {/* Login Button */}
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+          </form>
+
+          {/* Register */}
+
+          <p className="mt-6 text-center text-sm">
+            Don't have an account?{" "}
+            <Link
+                to="/register"
+                className="text-blue-600 hover:underline"
+            >
+              Register
+            </Link>
+          </p>
+
+        </div>
       </div>
-    </div>
   );
 }
 

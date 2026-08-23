@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import ForgotPassword from "../pages/ForgotPassword";
+import VerifyOtp from "../pages/VerifyOtp";
+import ResetPassword from "../pages/ResetPassword";
+
 import Dashboard from "../pages/Dashboard";
 import Vendors from "../pages/Vendors";
 import Products from "../pages/Products";
@@ -19,59 +23,73 @@ import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../layouts/MainLayout";
 
 function AppRoutes() {
-  return (
-      <BrowserRouter>
-        <Routes>
+    return (
+        <BrowserRouter>
+            <Routes>
 
-          {/* Public Routes */}
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+                {/* Public Routes */}
+                <Route path="/" element={<Login />} />
 
-          {/* Protected Routes */}
-          <Route
-              element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
 
-            <Route path="/vendors" element={<Vendors />} />
+                <Route
+                    path="/forgot-password"
+                    element={<ForgotPassword />}
+                />
 
-            <Route path="/products" element={<Products />} />
+                {/* OTP Verification */}
+                <Route
+                    path="/verify-otp"
+                    element={<VerifyOtp />}
+                />
 
-            <Route
-                path="/purchase-orders"
-                element={<PurchaseOrders />}
-            />
+                {/* Reset Password */}
+                <Route
+                    path="/reset-password"
+                    element={<ResetPassword />}
+                />
 
-            {/* Sales */}
-            <Route path="/sales" element={<Sales />} />
+                {/* Protected Routes */}
+                <Route
+                    element={
+                        <ProtectedRoute>
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/vendors" element={<Vendors />} />
+                    <Route path="/products" element={<Products />} />
 
-            <Route path="/inventory" element={<Inventory />} />
+                    <Route
+                        path="/purchase-orders"
+                        element={<PurchaseOrders />}
+                    />
 
-            <Route path="/invoices" element={<Invoices />} />
+                    <Route path="/sales" element={<Sales />} />
+                    <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/invoices" element={<Invoices />} />
+                    <Route path="/payments" element={<Payments />} />
+                    <Route path="/reports" element={<Reports />} />
 
-            <Route path="/payments" element={<Payments />} />
+                    <Route
+                        path="/notifications"
+                        element={<Notifications />}
+                    />
 
-            <Route path="/reports" element={<Reports />} />
+                    <Route path="/profile" element={<Profile />} />
 
-            <Route
-                path="/notifications"
-                element={<Notifications />}
-            />
+                </Route>
 
-            <Route path="/profile" element={<Profile />} />
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
 
-          </Route>
-
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-
-        </Routes>
-      </BrowserRouter>
-  );
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default AppRoutes;
