@@ -8,17 +8,10 @@ import {
 } from "../services/reportService";
 
 function Reports() {
-  const [activeReport, setActiveReport] =
-      useState(null);
-
-  const [reportData, setReportData] =
-      useState(null);
-
-  const [loading, setLoading] =
-      useState(false);
-
-  const [error, setError] =
-      useState("");
+  const [activeReport, setActiveReport] = useState(null);
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // =====================================
   // Load Sales Report
@@ -29,18 +22,13 @@ function Reports() {
       setLoading(true);
       setError("");
 
-      const response =
-          await getSalesReport();
+      const response = await getSalesReport();
 
       setReportData(response.data);
       setActiveReport("sales");
-
     } catch (error) {
       console.error(error);
-
-      setError(
-          "Failed to load sales report"
-      );
+      setError("Failed to load sales report");
     } finally {
       setLoading(false);
     }
@@ -55,18 +43,13 @@ function Reports() {
       setLoading(true);
       setError("");
 
-      const response =
-          await getPurchaseReport();
+      const response = await getPurchaseReport();
 
       setReportData(response.data);
       setActiveReport("purchase");
-
     } catch (error) {
       console.error(error);
-
-      setError(
-          "Failed to load purchase report"
-      );
+      setError("Failed to load purchase report");
     } finally {
       setLoading(false);
     }
@@ -81,18 +64,13 @@ function Reports() {
       setLoading(true);
       setError("");
 
-      const response =
-          await getInventoryReport();
+      const response = await getInventoryReport();
 
       setReportData(response.data);
       setActiveReport("inventory");
-
     } catch (error) {
       console.error(error);
-
-      setError(
-          "Failed to load inventory report"
-      );
+      setError("Failed to load inventory report");
     } finally {
       setLoading(false);
     }
@@ -107,18 +85,13 @@ function Reports() {
       setLoading(true);
       setError("");
 
-      const response =
-          await getVendorReport();
+      const response = await getVendorReport();
 
       setReportData(response.data);
       setActiveReport("vendor");
-
     } catch (error) {
       console.error(error);
-
-      setError(
-          "Failed to load vendor report"
-      );
+      setError("Failed to load vendor report");
     } finally {
       setLoading(false);
     }
@@ -126,29 +99,15 @@ function Reports() {
 
   return (
       <div>
-
-        {/* Header */}
-
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">
-            Reports
-          </h1>
-
-          <p className="text-gray-500 mt-1">
-            View business insights and reports
-          </p>
-        </div>
-
         {/* Report Buttons */}
 
         <div className="flex flex-wrap gap-4 mb-8">
-
           <button
               onClick={handleSalesReport}
-              className={`px-5 py-3 rounded-lg text-white ${
+              className={`px-5 py-3 rounded-lg font-medium transition ${
                   activeReport === "sales"
-                      ? "bg-blue-700"
-                      : "bg-blue-500 hover:bg-blue-600"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white border border-blue-200 text-blue-800 hover:bg-blue-50"
               }`}
           >
             Sales Report
@@ -156,10 +115,10 @@ function Reports() {
 
           <button
               onClick={handlePurchaseReport}
-              className={`px-5 py-3 rounded-lg text-white ${
+              className={`px-5 py-3 rounded-lg font-medium transition ${
                   activeReport === "purchase"
-                      ? "bg-green-700"
-                      : "bg-green-500 hover:bg-green-600"
+                      ? "bg-green-600 text-white"
+                      : "bg-white border border-green-200 text-green-800 hover:bg-green-50"
               }`}
           >
             Purchase Report
@@ -167,10 +126,10 @@ function Reports() {
 
           <button
               onClick={handleInventoryReport}
-              className={`px-5 py-3 rounded-lg text-white ${
+              className={`px-5 py-3 rounded-lg font-medium transition ${
                   activeReport === "inventory"
-                      ? "bg-purple-700"
-                      : "bg-purple-500 hover:bg-purple-600"
+                      ? "bg-purple-600 text-white"
+                      : "bg-white border border-purple-200 text-purple-800 hover:bg-purple-50"
               }`}
           >
             Inventory Report
@@ -178,21 +137,20 @@ function Reports() {
 
           <button
               onClick={handleVendorReport}
-              className={`px-5 py-3 rounded-lg text-white ${
+              className={`px-5 py-3 rounded-lg font-medium transition ${
                   activeReport === "vendor"
-                      ? "bg-orange-700"
-                      : "bg-orange-500 hover:bg-orange-600"
+                      ? "bg-orange-500 text-white"
+                      : "bg-white border border-orange-200 text-orange-800 hover:bg-orange-50"
               }`}
           >
             Vendor Report
           </button>
-
         </div>
 
         {/* Loading */}
 
         {loading && (
-            <p className="text-lg">
+            <p className="text-lg text-gray-600">
               Loading report...
             </p>
         )}
@@ -213,88 +171,76 @@ function Reports() {
             activeReport === "sales" &&
             reportData && (
                 <div>
-
-                  {/* Summary */}
+                  {/* Summary Cards */}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-                    <div className="bg-white shadow rounded-lg p-6">
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
                       <p className="text-gray-500">
                         Total Sales
                       </p>
 
-                      <h2 className="text-3xl font-bold">
+                      <h2 className="text-3xl font-bold text-gray-800 mt-2">
                         {reportData.summary?.totalSales ?? 0}
                       </h2>
                     </div>
 
-                    <div className="bg-white shadow rounded-lg p-6">
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
                       <p className="text-gray-500">
                         Total Revenue
                       </p>
 
-                      <h2 className="text-3xl font-bold">
+                      <h2 className="text-3xl font-bold text-gray-800 mt-2">
                         ₹
                         {Number(
                             reportData.summary?.totalRevenue ?? 0
                         ).toLocaleString()}
                       </h2>
                     </div>
-
                   </div>
 
                   {/* Sales Table */}
 
-                  <div className="bg-white shadow rounded-lg overflow-x-auto">
-
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-x-auto">
                     <table className="min-w-full">
-
-                      <thead className="bg-gray-100">
-
+                      <thead className="bg-gray-50">
                       <tr>
-
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Sale ID
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Product
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Quantity
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Price
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Total Amount
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Date
                         </th>
-
                       </tr>
-
                       </thead>
 
                       <tbody>
-
                       {reportData.sales?.map((sale) => (
-
                           <tr
                               key={sale.id}
                               className="border-t hover:bg-gray-50"
                           >
-
                             <td className="px-6 py-4">
-                              {sale.id}
+                              #{sale.id}
                             </td>
 
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 font-medium">
                               {sale.productName}
                             </td>
 
@@ -303,17 +249,11 @@ function Reports() {
                             </td>
 
                             <td className="px-6 py-4">
-                              ₹
-                              {Number(
-                                  sale.price
-                              ).toLocaleString()}
+                              ₹{Number(sale.price).toLocaleString()}
                             </td>
 
                             <td className="px-6 py-4">
-                              ₹
-                              {Number(
-                                  sale.totalAmount
-                              ).toLocaleString()}
+                              ₹{Number(sale.totalAmount).toLocaleString()}
                             </td>
 
                             <td className="px-6 py-4">
@@ -323,17 +263,11 @@ function Reports() {
                                   ).toLocaleDateString()
                                   : "-"}
                             </td>
-
                           </tr>
-
                       ))}
-
                       </tbody>
-
                     </table>
-
                   </div>
-
                 </div>
             )}
 
@@ -345,103 +279,83 @@ function Reports() {
             activeReport === "purchase" &&
             reportData && (
                 <div>
-
                   {/* Summary */}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-                    <div className="bg-white shadow rounded-lg p-6">
-
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
                       <p className="text-gray-500">
                         Total Purchase Orders
                       </p>
 
-                      <h2 className="text-3xl font-bold">
+                      <h2 className="text-3xl font-bold text-gray-800 mt-2">
                         {reportData.summary
                             ?.totalPurchaseOrders ?? 0}
                       </h2>
-
                     </div>
-
                   </div>
 
                   {/* Status Summary */}
 
-                  <div className="bg-white shadow rounded-lg p-6 mb-8">
-
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6 mb-8">
                     <h2 className="text-xl font-bold mb-4">
                       Purchase Status Summary
                     </h2>
 
                     <div className="flex flex-wrap gap-4">
-
                       {reportData.statusSummary?.map(
                           (item) => (
                               <div
                                   key={item.status}
-                                  className="border rounded-lg px-5 py-3"
+                                  className="border border-gray-200 rounded-xl px-5 py-4 min-w-[150px]"
                               >
-
                                 <p className="text-gray-500">
                                   {item.status}
                                 </p>
 
-                                <p className="text-2xl font-bold">
+                                <p className="text-2xl font-bold text-gray-800 mt-2">
                                   {item.count}
                                 </p>
-
                               </div>
                           )
                       )}
-
                     </div>
-
                   </div>
 
                   {/* Purchase Table */}
 
-                  <div className="bg-white shadow rounded-lg overflow-x-auto">
-
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-x-auto">
                     <table className="min-w-full">
-
-                      <thead className="bg-gray-100">
-
+                      <thead className="bg-gray-50">
                       <tr>
-
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           PO ID
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Vendor ID
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Total Amount
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Status
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Created Date
                         </th>
-
                       </tr>
-
                       </thead>
 
                       <tbody>
-
                       {reportData.purchases?.map(
                           (purchase) => (
-
                               <tr
                                   key={purchase.id}
                                   className="border-t hover:bg-gray-50"
                               >
-
                                 <td className="px-6 py-4">
                                   #{purchase.id}
                                 </td>
@@ -458,7 +372,15 @@ function Reports() {
                                 </td>
 
                                 <td className="px-6 py-4">
-                                  {purchase.status}
+                          <span
+                              className={`px-3 py-1 rounded-full text-sm ${
+                                  purchase.status === "Approved"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                              }`}
+                          >
+                            {purchase.status}
+                          </span>
                                 </td>
 
                                 <td className="px-6 py-4">
@@ -468,17 +390,12 @@ function Reports() {
                                       ).toLocaleDateString()
                                       : "-"}
                                 </td>
-
                               </tr>
                           )
                       )}
-
                       </tbody>
-
                     </table>
-
                   </div>
-
                 </div>
             )}
 
@@ -490,146 +407,131 @@ function Reports() {
             activeReport === "inventory" &&
             reportData && (
                 <div>
+                  {/* Summary Cards */}
 
-                  {/* Inventory Value */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                      <p className="text-gray-500">
+                        Total Inventory Value
+                      </p>
 
-                  <div className="bg-white shadow rounded-lg p-6 mb-8">
+                      <h2 className="text-3xl font-bold text-gray-800 mt-2">
+                        ₹
+                        {Number(
+                            reportData.inventoryValue
+                                ?.inventoryValue ?? 0
+                        ).toLocaleString()}
+                      </h2>
+                    </div>
 
-                    <p className="text-gray-500">
-                      Total Inventory Value
-                    </p>
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+                      <p className="text-gray-500">
+                        Low Stock Products
+                      </p>
 
-                    <h2 className="text-3xl font-bold">
-                      ₹
-                      {Number(
-                          reportData.inventoryValue
-                              ?.inventoryValue ?? 0
-                      ).toLocaleString()}
-                    </h2>
-
+                      <h2 className="text-3xl font-bold text-gray-800 mt-2">
+                        {reportData.lowStock?.length ?? 0}
+                      </h2>
+                    </div>
                   </div>
 
                   {/* Low Stock */}
 
-                  <div className="bg-white shadow rounded-lg p-6 mb-8">
-
-                    <h2 className="text-xl font-bold mb-4">
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-x-auto mb-8">
+                    <h2 className="text-xl font-bold p-6">
                       Low Stock Products
                     </h2>
 
                     {reportData.lowStock?.length === 0 ? (
-                        <p className="text-gray-500">
+                        <p className="text-gray-500 px-6 pb-6">
                           No low stock products.
                         </p>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <table className="min-w-full">
+                          <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-4 text-left">
+                              Product ID
+                            </th>
 
-                          <table className="min-w-full">
+                            <th className="px-6 py-4 text-left">
+                              Product Name
+                            </th>
 
-                            <thead className="bg-gray-100">
+                            <th className="px-6 py-4 text-left">
+                              Stock
+                            </th>
+                          </tr>
+                          </thead>
 
-                            <tr>
+                          <tbody>
+                          {reportData.lowStock?.map(
+                              (product) => (
+                                  <tr
+                                      key={product.id}
+                                      className="border-t hover:bg-gray-50"
+                                  >
+                                    <td className="px-6 py-4">
+                                      #{product.id}
+                                    </td>
 
-                              <th className="px-6 py-3 text-left">
-                                Product ID
-                              </th>
+                                    <td className="px-6 py-4 font-medium">
+                                      {product.name}
+                                    </td>
 
-                              <th className="px-6 py-3 text-left">
-                                Product Name
-                              </th>
-
-                              <th className="px-6 py-3 text-left">
-                                Stock
-                              </th>
-
-                            </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                            {reportData.lowStock?.map(
-                                (product) => (
-
-                                    <tr
-                                        key={product.id}
-                                        className="border-t"
-                                    >
-
-                                      <td className="px-6 py-4">
-                                        {product.id}
-                                      </td>
-
-                                      <td className="px-6 py-4">
-                                        {product.name}
-                                      </td>
-
-                                      <td className="px-6 py-4">
-                                        {product.stock}
-                                      </td>
-
-                                    </tr>
-                                )
-                            )}
-
-                            </tbody>
-
-                          </table>
-
-                        </div>
+                                    <td className="px-6 py-4">
+                            <span className="bg-yellow-50 text-gray-800 px-3 py-1 rounded-full">
+                              {product.stock}
+                            </span>
+                                    </td>
+                                  </tr>
+                              )
+                          )}
+                          </tbody>
+                        </table>
                     )}
-
                   </div>
 
                   {/* Inventory Products */}
 
-                  <div className="bg-white shadow rounded-lg overflow-x-auto">
-
+                  <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-x-auto">
                     <table className="min-w-full">
-
-                      <thead className="bg-gray-100">
-
+                      <thead className="bg-gray-50">
                       <tr>
-
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Product ID
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Product Name
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Stock
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Price
                         </th>
 
-                        <th className="px-6 py-3 text-left">
+                        <th className="px-6 py-4 text-left">
                           Total Value
                         </th>
-
                       </tr>
-
                       </thead>
 
                       <tbody>
-
                       {reportData.products?.map(
                           (product) => (
-
                               <tr
                                   key={product.id}
                                   className="border-t hover:bg-gray-50"
                               >
-
                                 <td className="px-6 py-4">
-                                  {product.id}
+                                  #{product.id}
                                 </td>
 
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 font-medium">
                                   {product.name}
                                 </td>
 
@@ -651,17 +553,12 @@ function Reports() {
                                       Number(product.stock)
                                   ).toLocaleString()}
                                 </td>
-
                               </tr>
                           )
                       )}
-
                       </tbody>
-
                     </table>
-
                   </div>
-
                 </div>
             )}
 
@@ -672,48 +569,39 @@ function Reports() {
         {!loading &&
             activeReport === "vendor" &&
             reportData && (
-                <div className="bg-white shadow rounded-lg overflow-x-auto">
-
+                <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-x-auto">
                   <table className="min-w-full">
-
-                    <thead className="bg-gray-100">
-
+                    <thead className="bg-gray-50">
                     <tr>
-
-                      <th className="px-6 py-3 text-left">
+                      <th className="px-6 py-4 text-left">
                         Vendor ID
                       </th>
 
-                      <th className="px-6 py-3 text-left">
+                      <th className="px-6 py-4 text-left">
                         Vendor Name
                       </th>
 
-                      <th className="px-6 py-3 text-left">
+                      <th className="px-6 py-4 text-left">
                         Total Products
                       </th>
 
-                      <th className="px-6 py-3 text-left">
+                      <th className="px-6 py-4 text-left">
                         Total Purchase Orders
                       </th>
-
                     </tr>
-
                     </thead>
 
                     <tbody>
-
                     {reportData.map((vendor) => (
-
                         <tr
                             key={vendor.id}
                             className="border-t hover:bg-gray-50"
                         >
-
                           <td className="px-6 py-4">
-                            {vendor.id}
+                            #{vendor.id}
                           </td>
 
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 font-medium">
                             {vendor.name}
                           </td>
 
@@ -724,18 +612,12 @@ function Reports() {
                           <td className="px-6 py-4">
                             {vendor.totalPurchaseOrders}
                           </td>
-
                         </tr>
-
                     ))}
-
                     </tbody>
-
                   </table>
-
                 </div>
             )}
-
       </div>
   );
 }

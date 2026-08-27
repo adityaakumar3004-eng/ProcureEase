@@ -119,7 +119,6 @@ function PurchaseOrders() {
       await exportPurchaseOrdersCSV();
     } catch (error) {
       console.error(error);
-
       alert("Failed to export Purchase Orders as CSV.");
     }
   };
@@ -129,7 +128,6 @@ function PurchaseOrders() {
       await exportPurchaseOrdersExcel();
     } catch (error) {
       console.error(error);
-
       alert("Failed to export Purchase Orders as Excel.");
     }
   };
@@ -139,7 +137,6 @@ function PurchaseOrders() {
       await exportPurchaseOrdersPDF();
     } catch (error) {
       console.error(error);
-
       alert("Failed to export Purchase Orders as PDF.");
     }
   };
@@ -303,7 +300,6 @@ function PurchaseOrders() {
     });
   }, [purchaseOrders, searchTerm]);
 
-  // Reset page when searching
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -331,46 +327,44 @@ function PurchaseOrders() {
   );
 
   if (loading) {
-    return <h2>Loading Purchase Orders...</h2>;
+    return (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-lg text-slate-500">
+            Loading Purchase Orders...
+          </p>
+        </div>
+    );
   }
 
   return (
       <div>
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col gap-4 mb-8 xl:flex-row xl:items-center xl:justify-end">
 
-          <h1 className="text-3xl font-bold">
-            Purchase Orders
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
 
-          <div className="flex items-center gap-3">
-
-            {/* Export CSV */}
             <button
                 onClick={handleExportCSV}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 rounded-lg border border-green-200 bg-green-50 text-green-700 font-medium hover:bg-green-100 transition"
             >
               Export CSV
             </button>
 
-            {/* Export Excel */}
             <button
                 onClick={handleExportExcel}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100 transition"
             >
               Export Excel
             </button>
 
-            {/* Export PDF */}
             <button
                 onClick={handleExportPDF}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-600 font-medium hover:bg-red-100 transition"
             >
               Export PDF
             </button>
 
-            {/* Create Purchase Order */}
             {(isAdmin || isManager) && (
                 <button
                     onClick={() => {
@@ -386,7 +380,7 @@ function PurchaseOrders() {
 
                       setShowModal(true);
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold shadow-sm transition"
                 >
                   + Create Purchase Order
                 </button>
@@ -396,40 +390,47 @@ function PurchaseOrders() {
 
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
-          <input
-              type="text"
-              placeholder="Search by ID, vendor, or status..."
-              value={searchTerm}
-              onChange={(e) =>
-                  setSearchTerm(e.target.value)
-              }
-              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {/* Search and Table Container */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
 
-        {/* Purchase Order Table */}
-        <PurchaseOrderTable
-            purchaseOrders={currentOrders}
-            handleStatusUpdate={handleStatusUpdate}
-        />
+          {/* Search */}
+          <div className="p-5 border-b border-slate-200">
+
+            <input
+                type="text"
+                placeholder="Search by ID, vendor, or status..."
+                value={searchTerm}
+                onChange={(e) =>
+                    setSearchTerm(e.target.value)
+                }
+                className="w-full max-w-xl border border-slate-300 rounded-lg px-4 py-3 text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+
+          </div>
+
+          {/* Purchase Order Table */}
+          <PurchaseOrderTable
+              purchaseOrders={currentOrders}
+              handleStatusUpdate={handleStatusUpdate}
+          />
+
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-6">
+            <div className="flex items-center justify-between mt-6">
 
               <button
                   onClick={() =>
                       setCurrentPage((prev) => prev - 1)
                   }
                   disabled={currentPage === 1}
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Previous
               </button>
 
-              <span className="font-semibold">
+              <span className="text-sm font-semibold text-slate-600">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -440,7 +441,7 @@ function PurchaseOrders() {
                   disabled={
                       currentPage === totalPages
                   }
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Next
               </button>

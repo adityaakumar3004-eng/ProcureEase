@@ -41,11 +41,9 @@ function Vendors() {
     try {
       setLoading(true);
 
-     const response = await getVendors();
+      const response = await getVendors();
 
-     console.log("Vendors:", response);
-
-     setVendors(response.data);
+      setVendors(response.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -121,10 +119,10 @@ function Vendors() {
       const search = searchTerm.toLowerCase();
 
       return (
-        vendor.name.toLowerCase().includes(search) ||
-        vendor.email.toLowerCase().includes(search) ||
-        vendor.phone.toLowerCase().includes(search) ||
-        vendor.address.toLowerCase().includes(search)
+          vendor.name.toLowerCase().includes(search) ||
+          vendor.email.toLowerCase().includes(search) ||
+          vendor.phone.toLowerCase().includes(search) ||
+          vendor.address.toLowerCase().includes(search)
       );
     });
   }, [vendors, searchTerm]);
@@ -137,112 +135,145 @@ function Vendors() {
   const indexOfFirstVendor = indexOfLastVendor - vendorsPerPage;
 
   const currentVendors = filteredVendors.slice(
-    indexOfFirstVendor,
-    indexOfLastVendor
+      indexOfFirstVendor,
+      indexOfLastVendor
   );
 
-  const totalPages = Math.ceil(filteredVendors.length / vendorsPerPage);
+  const totalPages = Math.ceil(
+      filteredVendors.length / vendorsPerPage
+  );
 
   if (loading) {
-    return <h2>Loading Vendors...</h2>;
+    return (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-lg font-medium text-slate-500">
+            Loading vendors...
+          </p>
+        </div>
+    );
   }
 
   return (
-    <div>
+      <div className="max-w-[1600px] mx-auto">
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-
-        <h1 className="text-3xl font-bold">
-          Vendors
-        </h1>
-
+        {/* Action Bar */}
         {(isAdmin || isManager) && (
-          <button
-            onClick={() => {
-              setIsEditing(false);
-              setEditingId(null);
+            <div className="flex justify-end mb-6">
+              <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditingId(null);
 
-              setFormData({
-                name: "",
-                email: "",
-                phone: "",
-                address: "",
-              });
+                    setFormData({
+                      name: "",
+                      email: "",
+                      phone: "",
+                      address: "",
+                    });
 
-              setShowModal(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
-          >
-            + Add Vendor
-          </button>
+                    setShowModal(true);
+                  }}
+                  className="rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
+              >
+                + Add Vendor
+              </button>
+            </div>
         )}
 
-      </div>
+        {/* Main Content Card */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 
-      {/* Search */}
-      <div className="mb-6">
+          {/* Search */}
+          <div className="border-b border-slate-200 p-5">
 
-        <input
-          type="text"
-          placeholder="🔍 Search vendors..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+            <div className="relative max-w-md">
+              <input
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-4 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
 
-      </div>
+          </div>
 
-      {/* Vendor Table */}
-      <VendorTable
-        vendors={currentVendors}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-      />
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <VendorTable
+                vendors={currentVendors}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+            />
+          </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+          {/* Pagination */}
+          {totalPages > 1 && (
+              <div className="flex flex-col gap-4 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
 
-        <div className="flex justify-between items-center mt-6">
+                <p className="text-sm text-slate-500">
+                  Showing{" "}
+                  <span className="font-medium text-slate-700">
+                {indexOfFirstVendor + 1}
+              </span>{" "}
+                  to{" "}
+                  <span className="font-medium text-slate-700">
+                {Math.min(indexOfLastVendor, filteredVendors.length)}
+              </span>{" "}
+                  of{" "}
+                  <span className="font-medium text-slate-700">
+                {filteredVendors.length}
+              </span>{" "}
+                  vendors
+                </p>
 
-          <button
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            disabled={currentPage === 1}
-            className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Previous
-          </button>
+                <div className="flex items-center gap-3">
 
-          <span className="font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
+                  <button
+                      onClick={() =>
+                          setCurrentPage((prev) => prev - 1)
+                      }
+                      disabled={currentPage === 1}
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
 
-          <button
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            disabled={currentPage === totalPages}
-            className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Next
-          </button>
+                  <span className="text-sm font-medium text-slate-600">
+                Page {currentPage} of {totalPages}
+              </span>
+
+                  <button
+                      onClick={() =>
+                          setCurrentPage((prev) => prev + 1)
+                      }
+                      disabled={currentPage === totalPages}
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+
+                </div>
+
+              </div>
+          )}
 
         </div>
 
-      )}
+        {/* Vendor Modal */}
+        <VendorModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+            formData={formData}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            setFormData={setFormData}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            setEditingId={setEditingId}
+        />
 
-      {/* Vendor Modal */}
-      <VendorModal
-        showModal={showModal}
-        setShowModal={setShowModal}
-        formData={formData}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        setFormData={setFormData}
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-        setEditingId={setEditingId}
-      />
-
-    </div>
+      </div>
   );
 }
 

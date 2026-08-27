@@ -17,20 +17,21 @@ function SaleModal({
     );
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
 
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-2xl font-bold text-gray-800">
                         Record Sale
                     </h2>
 
                     <button
+                        type="button"
                         onClick={() => setShowModal(false)}
-                        className="text-gray-500 hover:text-gray-700 text-2xl"
+                        className="text-gray-400 hover:text-gray-700 text-2xl leading-none"
                     >
                         ×
                     </button>
@@ -40,9 +41,9 @@ function SaleModal({
                 <form onSubmit={handleSubmit}>
 
                     {/* Product */}
-                    <div className="mb-4">
+                    <div className="mb-5">
 
-                        <label className="block mb-2 font-medium">
+                        <label className="block mb-2 font-medium text-gray-700">
                             Product
                         </label>
 
@@ -51,20 +52,22 @@ function SaleModal({
                             value={formData.productId}
                             onChange={handleChange}
                             required
-                            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                             <option value="">
                                 Select Product
                             </option>
 
                             {products.map((product) => (
+
                                 <option
                                     key={product.id}
                                     value={product.id}
-                                    disabled={product.stock <= 0}
+                                    disabled={Number(product.stock) <= 0}
                                 >
                                     {product.name} — Stock: {product.stock}
                                 </option>
+
                             ))}
 
                         </select>
@@ -74,32 +77,32 @@ function SaleModal({
                     {/* Product Information */}
                     {selectedProduct && (
 
-                        <div className="mb-4 bg-gray-50 border rounded-lg p-4">
+                        <div className="mb-5 bg-gray-50 border border-gray-200 rounded-lg p-4">
 
-                            <div className="flex justify-between mb-2">
+                            <div className="flex justify-between mb-3">
 
-                                <span className="text-gray-600">
-                                    Available Stock:
-                                </span>
+                <span className="text-gray-600">
+                  Available Stock
+                </span>
 
-                                <span className="font-semibold">
-                                    {selectedProduct.stock}
-                                </span>
+                                <span className="font-medium text-gray-800">
+                  {selectedProduct.stock}
+                </span>
 
                             </div>
 
                             <div className="flex justify-between">
 
-                                <span className="text-gray-600">
-                                    Product Price:
-                                </span>
+                <span className="text-gray-600">
+                  Product Price
+                </span>
 
-                                <span className="font-semibold">
-                                    ₹
+                                <span className="font-medium text-gray-800">
+                  ₹
                                     {Number(
                                         selectedProduct.price
                                     ).toLocaleString()}
-                                </span>
+                </span>
 
                             </div>
 
@@ -108,9 +111,9 @@ function SaleModal({
                     )}
 
                     {/* Quantity */}
-                    <div className="mb-6">
+                    <div className="mb-5">
 
-                        <label className="block mb-2 font-medium">
+                        <label className="block mb-2 font-medium text-gray-700">
                             Quantity
                         </label>
 
@@ -127,14 +130,19 @@ function SaleModal({
                             }
                             required
                             placeholder="Enter quantity"
-                            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
 
                         {selectedProduct && (
+
                             <p className="text-sm text-gray-500 mt-2">
+
                                 Maximum available quantity:{" "}
+
                                 {selectedProduct.stock}
+
                             </p>
+
                         )}
 
                     </div>
@@ -146,19 +154,21 @@ function SaleModal({
 
                             <div className="mb-6 bg-blue-50 border border-blue-100 rounded-lg p-4">
 
-                                <div className="flex justify-between">
+                                <div className="flex justify-between items-center">
 
-                                <span className="font-medium">
-                                    Estimated Total
-                                </span>
+                  <span className="font-medium text-blue-800">
+                    Estimated Total
+                  </span>
 
-                                    <span className="font-bold text-lg">
-                                    ₹
+                                    <span className="text-lg font-semibold text-blue-800">
+
+                    ₹
                                         {(
                                             Number(selectedProduct.price) *
                                             Number(formData.quantity)
                                         ).toLocaleString()}
-                                </span>
+
+                  </span>
 
                                 </div>
 
@@ -172,14 +182,14 @@ function SaleModal({
                         <button
                             type="button"
                             onClick={() => setShowModal(false)}
-                            className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                            className="px-5 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
                         >
                             Cancel
                         </button>
 
                         <button
                             type="submit"
-                            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                            className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition"
                         >
                             Record Sale
                         </button>

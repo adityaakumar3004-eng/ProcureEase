@@ -12,7 +12,6 @@ import PaymentTable from "../components/payments/PaymentTable";
 
 function Payments() {
     const [payments, setPayments] = useState([]);
-
     const [loading, setLoading] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -25,17 +24,24 @@ function Payments() {
         fetchPayments();
     }, []);
 
+    // ============================================================
+    // Fetch Payments
+    // ============================================================
+
     const fetchPayments = async () => {
         try {
             setLoading(true);
 
             const response = await getPayments();
 
-            console.log("Payments:", response);
-
             setPayments(response.data || []);
+
         } catch (error) {
-            console.error("Error fetching payments:", error);
+            console.error(
+                "Error fetching payments:",
+                error
+            );
+
         } finally {
             setLoading(false);
         }
@@ -48,27 +54,39 @@ function Payments() {
     const handleExportCSV = async () => {
         try {
             await exportPaymentsCSV();
+
         } catch (error) {
             console.error(error);
-            alert("Failed to export payments as CSV.");
+
+            alert(
+                "Failed to export payments as CSV."
+            );
         }
     };
 
     const handleExportExcel = async () => {
         try {
             await exportPaymentsExcel();
+
         } catch (error) {
             console.error(error);
-            alert("Failed to export payments as Excel.");
+
+            alert(
+                "Failed to export payments as Excel."
+            );
         }
     };
 
     const handleExportPDF = async () => {
         try {
             await exportPaymentsPDF();
+
         } catch (error) {
             console.error(error);
-            alert("Failed to export payments as PDF.");
+
+            alert(
+                "Failed to export payments as PDF."
+            );
         }
     };
 
@@ -80,6 +98,7 @@ function Payments() {
         const search = searchTerm.toLowerCase();
 
         return payments.filter((payment) => {
+
             return (
                 payment.invoiceNumber
                     ?.toLowerCase()
@@ -98,6 +117,7 @@ function Payments() {
                     .includes(search)
             );
         });
+
     }, [payments, searchTerm]);
 
     // ============================================================
@@ -125,43 +145,44 @@ function Payments() {
         );
 
     const totalPages = Math.ceil(
-        filteredPayments.length / paymentsPerPage
+        filteredPayments.length /
+        paymentsPerPage
     );
 
     if (loading) {
-        return <h2>Loading Payments...</h2>;
+        return (
+            <h2>
+                Loading Payments...
+            </h2>
+        );
     }
 
     return (
         <div>
 
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
+            {/* Export Buttons */}
 
-                <h1 className="text-3xl font-bold">
-                    Payments
-                </h1>
+            <div className="flex justify-end items-center mb-6">
 
-                {/* Export Buttons */}
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
 
                     <button
                         onClick={handleExportCSV}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                        className="px-4 py-2 rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors"
                     >
                         Export CSV
                     </button>
 
                     <button
                         onClick={handleExportExcel}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                        className="px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
                     >
                         Export Excel
                     </button>
 
                     <button
                         onClick={handleExportPDF}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                        className="px-4 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors"
                     >
                         Export PDF
                     </button>
@@ -171,25 +192,31 @@ function Payments() {
             </div>
 
             {/* Search */}
-            <div className="mb-6">
+
+            <div className="mb-6 bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+
                 <input
                     type="text"
-                    placeholder="Search payments..."
+                    placeholder="Search by invoice, vendor, method, or transaction ID..."
                     value={searchTerm}
                     onChange={(e) =>
                         setSearchTerm(e.target.value)
                     }
-                    className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+
             </div>
 
             {/* Payment Table */}
+
             <PaymentTable
                 payments={currentPayments}
             />
 
             {/* Pagination */}
+
             {totalPages > 1 && (
+
                 <div className="flex justify-between items-center mt-6">
 
                     <button
@@ -199,28 +226,34 @@ function Payments() {
                             )
                         }
                         disabled={currentPage === 1}
-                        className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                        className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Previous
                     </button>
 
-                    <span className="font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
+                    <span className="font-medium text-gray-700">
+                        Page {currentPage} of {totalPages}
+                    </span>
 
                     <button
                         onClick={() =>
                             setCurrentPage((prev) =>
-                                Math.min(prev + 1, totalPages)
+                                Math.min(
+                                    prev + 1,
+                                    totalPages
+                                )
                             )
                         }
-                        disabled={currentPage === totalPages}
-                        className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                        disabled={
+                            currentPage === totalPages
+                        }
+                        className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         Next
                     </button>
 
                 </div>
+
             )}
 
         </div>

@@ -1,98 +1,137 @@
 import { useAuth } from "../../context/AuthContext";
 
 function VendorTable({
-  vendors,
-  handleEdit,
-  handleDelete,
-}) {
+                         vendors,
+                         handleEdit,
+                         handleDelete,
+                     }) {
+    const { isAdmin, isManager } = useAuth();
 
-  const { isAdmin, isManager } = useAuth();
+    return (
+        <table className="min-w-full">
 
-  return (
-    <table className="min-w-full bg-white shadow rounded-lg overflow-hidden">
+            <thead className="bg-slate-50 border-b border-slate-200">
 
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="px-6 py-3 text-left">ID</th>
-          <th className="px-6 py-3 text-left">Name</th>
-          <th className="px-6 py-3 text-left">Email</th>
-          <th className="px-6 py-3 text-left">Phone</th>
-          <th className="px-6 py-3 text-left">Address</th>
+            <tr>
 
-          {(isAdmin || isManager) && (
-            <th className="px-6 py-3 text-center">
-              Actions
-            </th>
-          )}
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    ID
+                </th>
 
-        </tr>
-      </thead>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Name
+                </th>
 
-      <tbody>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Email
+                </th>
 
-        {vendors.map((vendor) => (
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Phone
+                </th>
 
-          <tr
-            key={vendor.id}
-            className="border-t hover:bg-gray-50"
-          >
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Address
+                </th>
 
-            <td className="px-6 py-4">
-              {vendor.id}
-            </td>
+                {(isAdmin || isManager) && (
+                    <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Actions
+                    </th>
+                )}
 
-            <td className="px-6 py-4">
-              {vendor.name}
-            </td>
+            </tr>
 
-            <td className="px-6 py-4">
-              {vendor.email}
-            </td>
+            </thead>
 
-            <td className="px-6 py-4">
-              {vendor.phone}
-            </td>
+            <tbody className="divide-y divide-slate-100">
 
-            <td className="px-6 py-4">
-              {vendor.address}
-            </td>
+            {vendors.length > 0 ? (
 
-            {(isAdmin || isManager) && (
+                vendors.map((vendor) => (
 
-              <td className="px-6 py-4">
-
-                <div className="flex justify-center gap-2">
-
-                  <button
-                    onClick={() => handleEdit(vendor)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition"
-                  >
-                    Edit
-                  </button>
-
-                  {isAdmin && (
-                    <button
-                      onClick={() => handleDelete(vendor.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+                    <tr
+                        key={vendor.id}
+                        className="transition hover:bg-slate-50"
                     >
-                      Delete
-                    </button>
-                  )}
 
-                </div>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-500">
+                            #{vendor.id}
+                        </td>
 
-              </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-800">
+                            {vendor.name}
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                            {vendor.email}
+                        </td>
+
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                            {vendor.phone}
+                        </td>
+
+                        <td className="max-w-xs px-6 py-4 text-sm text-slate-600">
+                <span className="block truncate">
+                  {vendor.address}
+                </span>
+                        </td>
+
+                        {(isAdmin || isManager) && (
+
+                            <td className="whitespace-nowrap px-6 py-4">
+
+                                <div className="flex justify-center gap-2">
+
+                                    <button
+                                        onClick={() => handleEdit(vendor)}
+                                        className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
+                                    >
+                                        Edit
+                                    </button>
+
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleDelete(vendor.id)}
+                                            className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
+
+                                </div>
+
+                            </td>
+
+                        )}
+
+                    </tr>
+
+                ))
+
+            ) : (
+
+                <tr>
+
+                    <td
+                        colSpan={
+                            isAdmin || isManager
+                                ? 6
+                                : 5
+                        }
+                        className="px-6 py-12 text-center text-sm text-slate-500"
+                    >
+                        No vendors found.
+                    </td>
+
+                </tr>
 
             )}
 
-          </tr>
+            </tbody>
 
-        ))}
-
-      </tbody>
-
-    </table>
-  );
+        </table>
+    );
 }
 
 export default VendorTable;

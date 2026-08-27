@@ -15,6 +15,7 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -46,97 +47,218 @@ function Login() {
   };
 
   return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200 px-4">
 
-          <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
-            ProcureEase
-          </h1>
+        <div className="w-full max-w-md">
 
-          <p className="text-center text-gray-500 mb-8">
-            Login to your account
-          </p>
+          {/* Login Card */}
 
-          {error && (
-              <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
-                {error}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-8 sm:p-10">
+
+            {/* Logo */}
+
+            <div className="text-center mb-8">
+
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
+
+              <span className="text-white text-2xl font-bold">
+                P
+              </span>
+
               </div>
-          )}
 
-          <form onSubmit={handleSubmit}>
+              <h1 className="text-3xl font-bold text-gray-800">
 
-            {/* Email */}
+                <span>Procure</span>
 
-            <div className="mb-4">
-              <label className="block mb-2 font-medium">
-                Email
-              </label>
+                <span className="text-blue-600">
+                Ease
+              </span>
 
-              <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email"
-                  required
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              </h1>
+
+              <p className="text-gray-500 mt-2">
+                Sign in to continue to your account
+              </p>
+
             </div>
 
-            {/* Password */}
+            {/* Error Message */}
 
-            <div className="mb-2">
-              <label className="block mb-2 font-medium">
-                Password
-              </label>
+            {error && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 
-              <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
-                  required
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              <span className="font-bold">
+                !
+              </span>
 
-            {/* Forgot Password */}
+                  <span>
+                {error}
+              </span>
 
-            <div className="text-right mb-6">
-              <Link
-                  to="/forgot-password"
-                  className="text-sm text-blue-600 hover:underline"
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+
+              {/* Email */}
+
+              <div className="mb-5">
+
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  Email Address
+                </label>
+
+                <div className="relative">
+
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+
+                  <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                  >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 12H8m8 0a4 4 0 100-8H8a4 4 0 000 8m8 0v4a4 4 0 01-4 4h0a4 4 0 01-4-4v-4"
+                    />
+                  </svg>
+
+                </span>
+
+                  <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      required
+                      className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-12 pr-4 text-gray-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* Password */}
+
+              <div className="mb-2">
+
+                <label className="block mb-2 text-sm font-semibold text-gray-700">
+                  Password
+                </label>
+
+                <div className="relative">
+
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+
+                  <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                  >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 11c1.657 0 3-1.343 3-3V6a3 3 0 10-6 0v2c0 1.657 1.343 3 3 3zm-6 9v-2a6 6 0 0112 0v2"
+                    />
+                  </svg>
+
+                </span>
+
+                  <input
+                      type={
+                        showPassword
+                            ? "text"
+                            : "password"
+                      }
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                      required
+                      className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-12 pr-12 text-gray-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+
+                  <button
+                      type="button"
+                      onClick={() =>
+                          setShowPassword(
+                              (prev) => !prev
+                          )
+                      }
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    {showPassword
+                        ? "Hide"
+                        : "Show"}
+                  </button>
+
+                </div>
+
+              </div>
+
+              {/* Forgot Password */}
+
+              <div className="flex justify-end mb-7">
+
+                <Link
+                    to="/forgot-password"
+                    className="text-sm font-medium text-blue-600 transition hover:text-blue-700 hover:underline"
+                >
+                  Forgot Password?
+                </Link>
+
+              </div>
+
+              {/* Login Button */}
+
+              <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-blue-400"
               >
-                Forgot Password?
+                {loading
+                    ? "Logging in..."
+                    : "Login"}
+              </button>
+
+            </form>
+
+            {/* Divider */}
+
+            <div className="my-7 border-t border-gray-200" />
+
+            {/* Register */}
+
+            <p className="text-center text-sm text-gray-600">
+
+              Don't have an account?{" "}
+
+              <Link
+                  to="/register"
+                  className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                Register
               </Link>
-            </div>
 
-            {/* Login Button */}
+            </p>
 
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
+          </div>
 
-          </form>
+          {/* Footer */}
 
-          {/* Register */}
 
-          <p className="mt-6 text-center text-sm">
-            Don't have an account?{" "}
-            <Link
-                to="/register"
-                className="text-blue-600 hover:underline"
-            >
-              Register
-            </Link>
-          </p>
 
         </div>
+
       </div>
   );
 }

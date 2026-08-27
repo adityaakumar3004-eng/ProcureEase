@@ -55,16 +55,9 @@ function Invoices() {
 
       const response = await getInvoices();
 
-      console.log("Invoices:", response);
-
       setInvoices(response.data || []);
-
     } catch (error) {
-      console.error(
-          "Error fetching invoices:",
-          error
-      );
-
+      console.error("Error fetching invoices:", error);
     } finally {
       setLoading(false);
     }
@@ -84,27 +77,44 @@ function Invoices() {
   };
 
   // ============================================================
+  // Reset Form
+  // ============================================================
+
+  const resetForm = () => {
+    setFormData({
+      purchase_order_id: "",
+      invoice_number: "",
+      invoice_date: "",
+      status: "Pending",
+      invoice: null,
+    });
+
+    setIsEditing(false);
+    setEditingId(null);
+  };
+
+  // ============================================================
+  // Add Invoice
+  // ============================================================
+
+  const handleAddInvoice = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  // ============================================================
   // Edit Invoice
   // ============================================================
 
   const handleEdit = (invoice) => {
     setIsEditing(true);
-
     setEditingId(invoice.id);
 
     setFormData({
-      purchase_order_id:
-          invoice.purchaseOrderId || "",
-
-      invoice_number:
-          invoice.invoiceNumber || "",
-
-      invoice_date:
-          invoice.invoiceDate?.split("T")[0] || "",
-
-      status:
-          invoice.status || "Pending",
-
+      purchase_order_id: invoice.purchaseOrderId || "",
+      invoice_number: invoice.invoiceNumber || "",
+      invoice_date: invoice.invoiceDate?.split("T")[0] || "",
+      status: invoice.status || "Pending",
       invoice: null,
     });
 
@@ -126,7 +136,6 @@ function Invoices() {
       await deleteInvoice(id);
 
       await fetchInvoices();
-
     } catch (error) {
       console.error(error);
 
@@ -149,7 +158,6 @@ function Invoices() {
       });
 
       await fetchInvoices();
-
     } catch (error) {
       console.error(error);
 
@@ -198,28 +206,15 @@ function Invoices() {
 
     try {
       if (isEditing) {
-        await updateInvoice(
-            editingId,
-            data
-        );
+        await updateInvoice(editingId, data);
       } else {
         await createInvoice(data);
       }
 
       await fetchInvoices();
 
-      setFormData({
-        purchase_order_id: "",
-        invoice_number: "",
-        invoice_date: "",
-        status: "Pending",
-        invoice: null,
-      });
-
+      resetForm();
       setShowModal(false);
-      setIsEditing(false);
-      setEditingId(null);
-
     } catch (error) {
       console.error(error);
 
@@ -232,33 +227,58 @@ function Invoices() {
   };
 
   // ============================================================
+  // Export Handlers
+  // ============================================================
+
+  const handleExportCSV = async () => {
+    try {
+      await exportInvoicesCSV();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export invoices as CSV.");
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportInvoicesExcel();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export invoices as Excel.");
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      await exportInvoicesPDF();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to export invoices as PDF.");
+    }
+  };
+
+  // ============================================================
   // Search
   // ============================================================
 
   const filteredInvoices = useMemo(() => {
-    const search =
-        searchTerm.toLowerCase();
+    const search = searchTerm.toLowerCase();
 
     return invoices.filter((invoice) => {
       return (
           invoice.invoiceNumber
               ?.toLowerCase()
               .includes(search) ||
-
           invoice.status
               ?.toLowerCase()
               .includes(search) ||
-
           invoice.paymentStatus
               ?.toLowerCase()
-              .includes(search)
+              .includes(search) ||
+          String(invoice.id).includes(search)
       );
     });
-
-  }, [
-    invoices,
-    searchTerm,
-  ]);
+  }, [invoices, searchTerm]);
 
   // ============================================================
   // Reset Page When Searching
@@ -276,8 +296,7 @@ function Invoices() {
       currentPage * invoicesPerPage;
 
   const indexOfFirstInvoice =
-      indexOfLastInvoice -
-      invoicesPerPage;
+      indexOfLastInvoice - invoicesPerPage;
 
   const currentInvoices =
       filteredInvoices.slice(
@@ -286,82 +305,48 @@ function Invoices() {
       );
 
   const totalPages = Math.ceil(
-      filteredInvoices.length /
-      invoicesPerPage
+      filteredInvoices.length / invoicesPerPage
   );
 
   if (loading) {
-    return (
-        <h2>
-          Loading Invoices...
-        </h2>
-    );
+    return <h2>Loading Invoices...</h2>;
   }
 
   return (
       <div>
 
-        {/* Header */}
-
         <div className="flex justify-between items-center mb-6">
 
-          <h1 className="text-3xl font-bold">
-            Invoices
-          </h1>
-
           <div className="flex items-center gap-3">
-
-            {/* Export CSV */}
-
             <button
-                onClick={exportInvoicesCSV}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                onClick={handleExportCSV}
+                className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition"
             >
               Export CSV
             </button>
 
-            {/* Export Excel */}
-
             <button
-                onClick={exportInvoicesExcel}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                onClick={handleExportExcel}
+                className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-lg transition"
             >
               Export Excel
             </button>
 
-            {/* Export PDF */}
-
             <button
-                onClick={exportInvoicesPDF}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                onClick={handleExportPDF}
+                className="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition"
             >
               Export PDF
             </button>
 
-            {/* Add Invoice */}
-
             {(isAdmin || isManager) && (
                 <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditingId(null);
-
-                      setFormData({
-                        purchase_order_id: "",
-                        invoice_number: "",
-                        invoice_date: "",
-                        status: "Pending",
-                        invoice: null,
-                      });
-
-                      setShowModal(true);
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                    onClick={handleAddInvoice}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
                 >
                   + Add Invoice
                 </button>
             )}
-
           </div>
 
         </div>
@@ -369,17 +354,15 @@ function Invoices() {
         {/* Search */}
 
         <div className="mb-6">
-
           <input
               type="text"
-              placeholder="Search invoices..."
+              placeholder="Search by invoice number, status, or payment..."
               value={searchTerm}
               onChange={(e) =>
                   setSearchTerm(e.target.value)
               }
               className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         {/* Invoice Table */}
@@ -396,17 +379,10 @@ function Invoices() {
         {/* Pagination */}
 
         {totalPages > 1 && (
-
             <div className="flex justify-between items-center mt-6">
-
               <button
                   onClick={() =>
-                      setCurrentPage((prev) =>
-                          Math.max(
-                              prev - 1,
-                              1
-                          )
-                      )
+                      setCurrentPage((prev) => prev - 1)
                   }
                   disabled={currentPage === 1}
                   className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
@@ -420,12 +396,7 @@ function Invoices() {
 
               <button
                   onClick={() =>
-                      setCurrentPage((prev) =>
-                          Math.min(
-                              prev + 1,
-                              totalPages
-                          )
-                      )
+                      setCurrentPage((prev) => prev + 1)
                   }
                   disabled={
                       currentPage === totalPages
@@ -434,9 +405,7 @@ function Invoices() {
               >
                 Next
               </button>
-
             </div>
-
         )}
 
         {/* Invoice Modal */}

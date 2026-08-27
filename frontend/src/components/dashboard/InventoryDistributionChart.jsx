@@ -32,7 +32,6 @@ function InventoryDistributionChart() {
           "/dashboard/inventory-distribution"
       );
 
-      // Backend directly returns a List
       const labels = response.data.map(
           (item) => item.category
       );
@@ -50,7 +49,9 @@ function InventoryDistributionChart() {
               "#22c55e",
               "#ef4444",
             ],
-            borderWidth: 1,
+            borderColor: "#ffffff",
+            borderWidth: 4,
+            hoverOffset: 8,
           },
         ],
       });
@@ -63,22 +64,31 @@ function InventoryDistributionChart() {
   };
 
   return (
-      <div className="bg-white p-6 rounded-xl shadow mt-8">
-        <h2 className="text-2xl font-bold mb-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mt-8">
+        <h2 className="text-xl font-bold text-slate-800 mb-6">
           Inventory Distribution
         </h2>
 
-        <Doughnut
-            data={chartData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: "bottom",
+        <div className="h-[350px] flex items-center justify-center">
+          <Doughnut
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "65%",
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      usePointStyle: true,
+                      boxWidth: 10,
+                      padding: 20,
+                    },
+                  },
                 },
-              },
-            }}
-        />
+              }}
+          />
+        </div>
       </div>
   );
 }

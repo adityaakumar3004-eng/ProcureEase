@@ -1,6 +1,9 @@
 import api from "./api";
 
+// ============================================================
 // Get Products
+// ============================================================
+
 export const getProducts = async (params = {}) => {
   const response = await api.get("/products", {
     params,
@@ -9,43 +12,42 @@ export const getProducts = async (params = {}) => {
   return response.data;
 };
 
+// ============================================================
 // Create Product
+// ============================================================
+
 export const createProduct = async (formData) => {
   const response = await api.post(
-    "/products",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+      "/products",
+      formData
   );
 
   return response.data;
 };
 
+// ============================================================
 // Update Product
+// ============================================================
+
 export const updateProduct = async (
-  id,
-  formData
+    id,
+    formData
 ) => {
   const response = await api.put(
-    `/products/${id}`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+      `/products/${id}`,
+      formData
   );
 
   return response.data;
 };
 
+// ============================================================
 // Delete Product
+// ============================================================
+
 export const deleteProduct = async (id) => {
   const response = await api.delete(
-    `/products/${id}`
+      `/products/${id}`
   );
 
   return response.data;

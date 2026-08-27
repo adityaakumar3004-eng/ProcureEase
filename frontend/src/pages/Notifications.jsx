@@ -13,8 +13,15 @@ function Notifications() {
   const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
-
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [generatingLowStock, setGeneratingLowStock] =
+      useState(false);
+
+  const [generatingPaymentDue, setGeneratingPaymentDue] =
+      useState(false);
+
+  const [processingId, setProcessingId] = useState(null);
 
   const notificationsPerPage = 5;
 
@@ -32,17 +39,7 @@ function Notifications() {
 
       const response = await getNotifications();
 
-      console.log("Notifications:", response.data);
-
-      // Backend response:
-      // {
-      //   success: true,
-      //   count: ...,
-      //   data: [...]
-      // }
-
       setNotifications(response.data.data || []);
-
     } catch (error) {
       console.error(
           "Error fetching notifications:",
@@ -61,16 +58,17 @@ function Notifications() {
 
   const handleGenerateLowStock = async () => {
     try {
+      setGeneratingLowStock(true);
+
       const response =
           await generateLowStockNotifications();
 
       alert(
           response.data.message ||
-          "Low stock notifications generated."
+          "Low stock notifications generated successfully."
       );
 
       await fetchNotifications();
-
     } catch (error) {
       console.error(error);
 
@@ -78,6 +76,8 @@ function Notifications() {
           error.response?.data?.message ||
           "Failed to generate low stock notifications."
       );
+    } finally {
+      setGeneratingLowStock(false);
     }
   };
 
@@ -87,16 +87,17 @@ function Notifications() {
 
   const handleGeneratePaymentDue = async () => {
     try {
+      setGeneratingPaymentDue(true);
+
       const response =
           await generatePaymentDueNotifications();
 
       alert(
           response.data.message ||
-          "Payment due notifications generated."
+          "Payment due notifications generated successfully."
       );
 
       await fetchNotifications();
-
     } catch (error) {
       console.error(error);
 
@@ -104,6 +105,8 @@ function Notifications() {
           error.response?.data?.message ||
           "Failed to generate payment due notifications."
       );
+    } finally {
+      setGeneratingPaymentDue(false);
     }
   };
 
@@ -113,10 +116,20 @@ function Notifications() {
 
   const handleMarkAsRead = async (id) => {
     try {
+      setProcessingId(id);
+
       await markNotificationAsRead(id);
 
-      await fetchNotifications();
-
+      setNotifications((prev) =>
+          prev.map((notification) =>
+              notification.id === id
+                  ? {
+                    ...notification,
+                    isRead: true,
+                  }
+                  : notification
+          )
+      );
     } catch (error) {
       console.error(error);
 
@@ -124,6 +137,8 @@ function Notifications() {
           error.response?.data?.message ||
           "Failed to mark notification as read."
       );
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -139,10 +154,15 @@ function Notifications() {
     if (!confirmDelete) return;
 
     try {
+      setProcessingId(id);
+
       await deleteNotification(id);
 
-      await fetchNotifications();
-
+      setNotifications((prev) =>
+          prev.filter(
+              (notification) => notification.id !== id
+          )
+      );
     } catch (error) {
       console.error(error);
 
@@ -150,6 +170,8 @@ function Notifications() {
           error.response?.data?.message ||
           "Failed to delete notification."
       );
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -158,18 +180,18 @@ function Notifications() {
   // ============================================================
 
   const filteredNotifications = useMemo(() => {
-    const search = searchTerm.toLowerCase();
+    const search = searchTerm
+        .toLowerCase()
+        .trim();
 
     return notifications.filter((notification) => {
       return (
           notification.title
               ?.toLowerCase()
               .includes(search) ||
-
           notification.message
               ?.toLowerCase()
               .includes(search) ||
-
           notification.type
               ?.toLowerCase()
               .includes(search)
@@ -177,7 +199,10 @@ function Notifications() {
     });
   }, [notifications, searchTerm]);
 
-  // Reset page when searching
+  // ============================================================
+  // Reset Page When Searching
+  // ============================================================
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -204,42 +229,56 @@ function Notifications() {
       notificationsPerPage
   );
 
+  // ============================================================
+  // Loading
+  // ============================================================
+
   if (loading) {
-    return <h2>Loading Notifications...</h2>;
+    return (
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-gray-700">
+            Loading Notifications...
+          </h2>
+        </div>
+    );
   }
 
   return (
       <div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        {/* ====================================================== */}
+        {/* Header Actions */}
+        {/* ====================================================== */}
 
-          <h1 className="text-3xl font-bold">
-            Notifications
-          </h1>
+        <div className="flex justify-end flex-wrap gap-3 mb-8">
 
-          <div className="flex gap-3">
+          <button
+              onClick={handleGenerateLowStock}
+              disabled={generatingLowStock}
+              className="px-5 py-2.5 rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition"
+          >
+            {generatingLowStock
+                ? "Generating..."
+                : "Generate Low Stock"}
+          </button>
 
-            <button
-                onClick={handleGenerateLowStock}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
-            >
-              Generate Low Stock
-            </button>
-
-            <button
-                onClick={handleGeneratePaymentDue}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-            >
-              Generate Payment Due
-            </button>
-
-          </div>
+          <button
+              onClick={handleGeneratePaymentDue}
+              disabled={generatingPaymentDue}
+              className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium transition shadow-sm"
+          >
+            {generatingPaymentDue
+                ? "Generating..."
+                : "Generate Payment Due"}
+          </button>
 
         </div>
 
+        {/* ====================================================== */}
         {/* Search */}
-        <div className="mb-6">
+        {/* ====================================================== */}
+
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-5">
 
           <input
               type="text"
@@ -248,18 +287,45 @@ function Notifications() {
               onChange={(e) =>
                   setSearchTerm(e.target.value)
               }
-              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
         </div>
 
+        {/* ====================================================== */}
+        {/* Notification Summary */}
+        {/* ====================================================== */}
+
+        <div className="mb-5">
+
+          <p className="text-sm text-gray-500">
+            Showing{" "}
+            <span className="font-medium text-gray-700">
+            {currentNotifications.length}
+          </span>{" "}
+            of{" "}
+            <span className="font-medium text-gray-700">
+            {filteredNotifications.length}
+          </span>{" "}
+            notifications
+          </p>
+
+        </div>
+
+        {/* ====================================================== */}
         {/* Notifications */}
+        {/* ====================================================== */}
+
         <div className="space-y-4">
 
           {currentNotifications.length === 0 ? (
 
-              <div className="text-center py-10 text-gray-500">
-                No notifications found.
+              <div className="bg-white border border-gray-200 shadow-sm rounded-xl text-center py-12">
+
+                <p className="text-gray-500">
+                  No notifications found.
+                </p>
+
               </div>
 
           ) : (
@@ -268,72 +334,92 @@ function Notifications() {
 
                   <div
                       key={notification.id}
-                      className={`border rounded-lg p-4 flex justify-between items-center ${
+                      className={`bg-white rounded-xl border shadow-sm p-5 transition ${
                           notification.isRead
-                              ? "bg-white"
-                              : "bg-blue-50 border-blue-200"
+                              ? "border-gray-200"
+                              : "border-blue-300"
                       }`}
                   >
 
-                    <div>
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
-                      <div className="flex items-center gap-3">
+                      {/* Notification Content */}
 
-                        <h3 className="font-semibold text-lg">
-                          {notification.title}
-                        </h3>
+                      <div className="flex-1">
 
-                        <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                    {notification.type}
-                  </span>
+                        <div className="flex flex-wrap items-center gap-3">
 
-                        {!notification.isRead && (
-                            <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
-                      New
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            {notification.title}
+                          </h3>
+
+                          <span className="text-xs bg-gray-100 border border-gray-200 text-gray-600 px-3 py-1 rounded-full">
+                      {notification.type}
                     </span>
-                        )}
+
+                          {!notification.isRead && (
+
+                              <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full">
+                        New
+                      </span>
+
+                          )}
+
+                        </div>
+
+                        <p className="text-gray-600 mt-3 leading-relaxed">
+                          {notification.message}
+                        </p>
+
+                        <p className="text-sm text-gray-400 mt-3">
+                          {notification.createdAt
+                              ? new Date(
+                                  notification.createdAt
+                              ).toLocaleString()
+                              : "-"}
+                        </p>
 
                       </div>
 
-                      <p className="text-gray-600 mt-2">
-                        {notification.message}
-                      </p>
+                      {/* Actions */}
 
-                      <p className="text-sm text-gray-400 mt-2">
-                        {notification.createdAt
-                            ? new Date(
-                                notification.createdAt
-                            ).toLocaleString()
-                            : ""}
-                      </p>
+                      <div className="flex flex-wrap gap-2 lg:flex-nowrap">
 
-                    </div>
+                        {!notification.isRead && (
 
-                    <div className="flex gap-2 ml-4">
+                            <button
+                                onClick={() =>
+                                    handleMarkAsRead(
+                                        notification.id
+                                    )
+                                }
+                                disabled={
+                                    processingId === notification.id
+                                }
+                                className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition whitespace-nowrap"
+                            >
+                              {processingId === notification.id
+                                  ? "Processing..."
+                                  : "Mark Read"}
+                            </button>
 
-                      {!notification.isRead && (
+                        )}
 
-                          <button
-                              onClick={() =>
-                                  handleMarkAsRead(
-                                      notification.id
-                                  )
-                              }
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded"
-                          >
-                            Mark Read
-                          </button>
+                        <button
+                            onClick={() =>
+                                handleDelete(notification.id)
+                            }
+                            disabled={
+                                processingId === notification.id
+                            }
+                            className="px-4 py-2 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition whitespace-nowrap"
+                        >
+                          {processingId === notification.id
+                              ? "Processing..."
+                              : "Delete"}
+                        </button>
 
-                      )}
-
-                      <button
-                          onClick={() =>
-                              handleDelete(notification.id)
-                          }
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
-                      >
-                        Delete
-                      </button>
+                      </div>
 
                     </div>
 
@@ -345,7 +431,10 @@ function Notifications() {
 
         </div>
 
+        {/* ====================================================== */}
         {/* Pagination */}
+        {/* ====================================================== */}
+
         {totalPages > 1 && (
 
             <div className="flex justify-between items-center mt-6">
@@ -357,12 +446,12 @@ function Notifications() {
                       )
                   }
                   disabled={currentPage === 1}
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Previous
               </button>
 
-              <span className="font-semibold">
+              <span className="text-sm font-medium text-gray-600">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -378,7 +467,7 @@ function Notifications() {
                   disabled={
                       currentPage === totalPages
                   }
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Next
               </button>

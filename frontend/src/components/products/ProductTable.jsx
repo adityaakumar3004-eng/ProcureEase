@@ -7,155 +7,205 @@ function ProductTable({
                       }) {
   const { isAdmin, isManager } = useAuth();
 
-  const IMAGE_BASE_URL =
-      "https://procureease-backend.onrender.com/uploads/products";
-
-  console.log("Products received:", products);
-
   const getImageUrl = (image) => {
-    if (!image) return null;
+    if (!image) {
+      return null;
+    }
 
-    // If backend already sends a complete URL
+    // If image is already a complete URL
     if (image.startsWith("http")) {
       return image;
     }
 
-    // Remove leading slash if present
+    // Remove extra slashes
     const cleanImageName = image.replace(/^\/+/, "");
 
-    // If image already contains uploads/products
-    if (cleanImageName.startsWith("uploads/products/")) {
-      return `https://procureease-backend.onrender.com/${cleanImageName}`;
-    }
-
-    // Normal filename
-    return `${IMAGE_BASE_URL}/${cleanImageName}`;
+    // Use the backend currently running locally
+    return `http://localhost:5000/uploads/products/${cleanImageName}`;
   };
 
   return (
-      <div className="bg-white rounded-xl shadow overflow-x-auto">
-        <table className="min-w-full border-collapse">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
 
-          <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-3 text-left">Image</th>
-            <th className="px-4 py-3 text-left">Name</th>
-            <th className="px-4 py-3 text-left">Description</th>
-            <th className="px-4 py-3 text-left">Vendor</th>
-            <th className="px-4 py-3 text-left">Price</th>
-            <th className="px-4 py-3 text-left">Stock</th>
-            <th className="px-4 py-3 text-center">Actions</th>
-          </tr>
-          </thead>
+        <div className="overflow-x-auto">
 
-          <tbody>
-          {products.length === 0 ? (
-              <tr>
-                <td
-                    colSpan="7"
-                    className="text-center py-8"
-                >
-                  No Products Found
-                </td>
-              </tr>
-          ) : (
-              products.map((product) => {
-                const imageUrl = getImageUrl(product.image);
+          <table className="min-w-full border-collapse">
 
-                console.log(
-                    "Product:",
-                    product.name,
-                    "| Image:",
-                    product.image,
-                    "| Final URL:",
-                    imageUrl
-                );
+            <thead className="bg-slate-50 border-b border-slate-200">
 
-                return (
-                    <tr
-                        key={product.id}
-                        className="border-t hover:bg-gray-50"
-                    >
-                      {/* Image */}
-                      <td className="px-4 py-3">
-                        {imageUrl ? (
-                            <img
-                                src={imageUrl}
-                                alt={product.name}
-                                className="w-16 h-16 object-cover rounded-lg border"
-                                onError={(e) => {
-                                  console.error(
-                                      `Failed to load image for ${product.name}:`,
-                                      imageUrl
-                                  );
+            <tr>
 
-                                  e.currentTarget.style.display = "none";
-                                }}
-                            />
-                        ) : (
-                            <div className="w-16 h-16 flex items-center justify-center border rounded-lg text-xs text-gray-400">
-                              No Image
-                            </div>
-                        )}
-                      </td>
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Image
+              </th>
 
-                      {/* Name */}
-                      <td className="px-4 py-3">
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Name
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Description
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Vendor
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Price
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Stock
+              </th>
+
+              {(isAdmin || isManager) && (
+                  <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Actions
+                  </th>
+              )}
+
+            </tr>
+
+            </thead>
+
+            <tbody className="divide-y divide-slate-100">
+
+            {products.length === 0 ? (
+
+                <tr>
+                  <td
+                      colSpan={isAdmin || isManager ? 7 : 6}
+                      className="py-12 text-center text-slate-500"
+                  >
+                    No Products Found
+                  </td>
+                </tr>
+
+            ) : (
+
+                products.map((product) => {
+                  const imageUrl = getImageUrl(product.image);
+
+                  return (
+                      <tr
+                          key={product.id}
+                          className="hover:bg-slate-50 transition"
+                      >
+
+                        {/* Image */}
+                        <td className="px-5 py-4">
+
+                          {imageUrl ? (
+                              <img
+                                  key={product.image}
+                                  src={imageUrl}
+                                  alt={product.name}
+                                  className="w-14 h-14 object-cover rounded-lg border border-slate-200"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                              />
+                          ) : (
+                              <div className="w-14 h-14 flex items-center justify-center border border-slate-200 rounded-lg text-xs text-slate-400">
+                                No Image
+                              </div>
+                          )}
+
+                        </td>
+
+                        {/* Name */}
+                        <td className="px-5 py-4">
+
+                      <span className="font-semibold text-slate-800">
                         {product.name}
-                      </td>
+                      </span>
 
-                      {/* Description */}
-                      <td className="px-4 py-3">
-                        {product.description}
-                      </td>
+                        </td>
 
-                      {/* Vendor */}
-                      <td className="px-4 py-3">
-                        {product.vendorName}
-                      </td>
+                        {/* Description */}
+                        <td className="px-5 py-4 max-w-xs">
 
-                      {/* Price */}
-                      <td className="px-4 py-3">
+                          <p className="text-sm text-slate-500 truncate">
+                            {product.description}
+                          </p>
+
+                        </td>
+
+                        {/* Vendor */}
+                        <td className="px-5 py-4 text-sm text-slate-600">
+                          {product.vendorName}
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-5 py-4">
+
+                      <span className="font-semibold text-slate-700">
                         ₹{Number(product.price).toLocaleString()}
-                      </td>
+                      </span>
 
-                      {/* Stock */}
-                      <td className="px-4 py-3">
-                        {product.stock}
-                      </td>
+                        </td>
 
-                      {/* Actions */}
-                      <td className="px-4 py-3">
-                        <div className="flex justify-center gap-2">
+                        {/* Stock */}
+                        <td className="px-5 py-4">
 
-                          {(isAdmin || isManager) && (
-                              <button
-                                  onClick={() => handleEdit(product)}
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                              >
-                                Edit
-                              </button>
-                          )}
+                      <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
+                              product.stock > 10
+                                  ? "bg-green-100 text-green-700"
+                                  : product.stock > 0
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-red-100 text-red-700"
+                          }`}
+                      >
+                        {product.stock} in stock
+                      </span>
 
-                          {isAdmin && (
-                              <button
-                                  onClick={() => handleDelete(product.id)}
-                                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                              >
-                                Delete
-                              </button>
-                          )}
+                        </td>
 
-                        </div>
-                      </td>
+                        {/* Actions */}
+                        {(isAdmin || isManager) && (
 
-                    </tr>
-                );
-              })
-          )}
-          </tbody>
+                            <td className="px-5 py-4">
 
-        </table>
+                              <div className="flex justify-center gap-2">
+
+                                <button
+                                    onClick={() => handleEdit(product)}
+                                    className="px-4 py-2 rounded-lg border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 font-medium text-sm transition"
+                                >
+                                  Edit
+                                </button>
+
+                                {isAdmin && (
+                                    <button
+                                        onClick={() =>
+                                            handleDelete(product.id)
+                                        }
+                                        className="px-4 py-2 rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 font-medium text-sm transition"
+                                    >
+                                      Delete
+                                    </button>
+                                )}
+
+                              </div>
+
+                            </td>
+
+                        )}
+
+                      </tr>
+                  );
+                })
+
+            )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
       </div>
   );
 }

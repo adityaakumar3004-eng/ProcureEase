@@ -59,22 +59,30 @@ function Products() {
     total: 0,
   });
 
-  // Fetch products
+  // ============================================================
+  // Fetch Products
+  // ============================================================
+
   useEffect(() => {
     fetchProducts();
   }, [filters]);
 
-  // Fetch vendors once
+  // ============================================================
+  // Fetch Vendors
+  // ============================================================
+
   useEffect(() => {
     fetchVendors();
   }, []);
 
-  // Debounce search
+  // ============================================================
+  // Search Debounce
+  // ============================================================
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilters((prev) => ({
         ...prev,
-        search: prev.search,
         page: 1,
       }));
     }, 500);
@@ -82,7 +90,10 @@ function Products() {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  // Debounce minimum price
+  // ============================================================
+  // Minimum Price Debounce
+  // ============================================================
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilters((prev) => ({
@@ -95,7 +106,10 @@ function Products() {
     return () => clearTimeout(timer);
   }, [minPriceInput]);
 
-  // Debounce maximum price
+  // ============================================================
+  // Maximum Price Debounce
+  // ============================================================
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilters((prev) => ({
@@ -108,35 +122,47 @@ function Products() {
     return () => clearTimeout(timer);
   }, [maxPriceInput]);
 
+  // ============================================================
+  // Fetch Products Function
+  // ============================================================
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
 
       const response = await getProducts(filters);
 
-      setProducts(response.data);
+      setProducts(response.data || []);
 
       setPagination({
-        page: response.page,
-        totalPages: response.totalPages,
-        total: response.total,
+        page: response.page || 1,
+        totalPages: response.totalPages || 1,
+        total: response.total || 0,
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  // ============================================================
+  // Fetch Vendors Function
+  // ============================================================
+
   const fetchVendors = async () => {
     try {
       const response = await getVendors();
 
-      setVendors(response.data);
+      setVendors(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching vendors:", error);
     }
   };
+
+  // ============================================================
+  // Handle Form Change
+  // ============================================================
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -144,7 +170,9 @@ function Products() {
     if (name === "productImage") {
       setFormData((prev) => ({
         ...prev,
-        productImage: files[0],
+        productImage: files && files[0]
+            ? files[0]
+            : null,
       }));
 
       return;
@@ -156,40 +184,56 @@ function Products() {
     }));
   };
 
+  // ============================================================
+  // Edit Product
+  // ============================================================
+
   const handleEdit = (product) => {
     setIsEditing(true);
     setEditingId(product.id);
 
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      vendor_id: String(product.vendorId),
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price || "",
+      stock: product.stock ?? "",
+      vendor_id: String(product.vendorId || ""),
       productImage: null,
     });
 
     setShowModal(true);
   };
 
+  // ============================================================
+  // Delete Product
+  // ============================================================
+
   const handleDelete = async (id) => {
-    if (
-        !window.confirm(
-            "Are you sure you want to delete this product?"
-        )
-    ) {
+    const confirmDelete = window.confirm(
+        "Are you sure you want to delete this product?"
+    );
+
+    if (!confirmDelete) {
       return;
     }
 
     try {
       await deleteProduct(id);
 
-      fetchProducts();
+      await fetchProducts();
     } catch (error) {
       console.error(error);
-      alert("Failed to delete product.");
+
+      alert(
+          error.response?.data?.message ||
+          "Failed to delete product."
+      );
     }
   };
+
+  // ============================================================
+  // Create / Update Product
+  // ============================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -197,23 +241,33 @@ function Products() {
     try {
       const submitData = new FormData();
 
-      submitData.append("name", formData.name);
+      submitData.append(
+          "name",
+          formData.name
+      );
 
       submitData.append(
           "description",
           formData.description
       );
 
-      submitData.append("price", formData.price);
+      submitData.append(
+          "price",
+          formData.price
+      );
 
-      submitData.append("stock", formData.stock);
+      submitData.append(
+          "stock",
+          formData.stock
+      );
 
       submitData.append(
           "vendorId",
           formData.vendor_id
       );
 
-      if (formData.productImage) {
+      // Add image only when a file is selected
+      if (formData.productImage instanceof File) {
         submitData.append(
             "productImage",
             formData.productImage
@@ -226,11 +280,15 @@ function Products() {
             submitData
         );
       } else {
-        await createProduct(submitData);
+        await createProduct(
+            submitData
+        );
       }
 
-      fetchProducts();
+      // Wait until latest products are loaded
+      await fetchProducts();
 
+      // Reset form
       setFormData({
         name: "",
         description: "",
@@ -240,18 +298,26 @@ function Products() {
         productImage: null,
       });
 
-      setShowModal(false);
       setEditingId(null);
       setIsEditing(false);
+      setShowModal(false);
+
     } catch (error) {
-      console.error(error);
-      alert("Operation failed.");
+      console.error(
+          "Product operation failed:",
+          error
+      );
+
+      alert(
+          error.response?.data?.message ||
+          "Operation failed."
+      );
     }
   };
 
-  // ============================
-  // Export Handlers
-  // ============================
+  // ============================================================
+  // Export Products
+  // ============================================================
 
   const handleExportCSV = async () => {
     try {
@@ -280,6 +346,10 @@ function Products() {
     }
   };
 
+  // ============================================================
+  // Update Filter
+  // ============================================================
+
   const updateFilter = (key, value) => {
     setFilters((prev) => ({
       ...prev,
@@ -287,6 +357,10 @@ function Products() {
       page: 1,
     }));
   };
+
+  // ============================================================
+  // Pagination
+  // ============================================================
 
   const nextPage = () => {
     if (pagination.page < pagination.totalPages) {
@@ -306,178 +380,187 @@ function Products() {
     }
   };
 
+  // ============================================================
+  // Open Add Product Modal
+  // ============================================================
+
+  const openAddModal = () => {
+    setIsEditing(false);
+    setEditingId(null);
+
+    setFormData({
+      name: "",
+      description: "",
+      price: "",
+      stock: "",
+      vendor_id: "",
+      productImage: null,
+    });
+
+    setShowModal(true);
+  };
+
+  // ============================================================
+  // Loading
+  // ============================================================
+
   if (loading && products.length === 0) {
-    return <h2>Loading Products...</h2>;
+    return (
+        <div className="flex items-center justify-center py-20">
+          <h2 className="text-lg font-medium text-slate-500">
+            Loading Products...
+          </h2>
+        </div>
+    );
   }
 
   return (
-      <div>
+      <div className="max-w-[1600px] mx-auto">
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        {/* Header Actions */}
+        <div className="flex flex-col gap-4 mb-7 lg:flex-row lg:items-center lg:justify-end">
 
-          <h1 className="text-3xl font-bold">
-            Products
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
 
-          <div className="flex gap-2">
-
-            {/* Export CSV */}
             <button
                 onClick={handleExportCSV}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 text-sm font-medium text-green-700 bg-white border border-green-200 rounded-lg shadow-sm hover:bg-green-50 transition"
             >
               Export CSV
             </button>
 
-            {/* Export Excel */}
             <button
                 onClick={handleExportExcel}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 text-sm font-medium text-emerald-700 bg-white border border-emerald-200 rounded-lg shadow-sm hover:bg-emerald-50 transition"
             >
               Export Excel
             </button>
 
-            {/* Export PDF */}
             <button
                 onClick={handleExportPDF}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                className="px-4 py-2.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg shadow-sm hover:bg-red-50 transition"
             >
               Export PDF
             </button>
 
-            {/* Add Product */}
             {(isAdmin || isManager) && (
                 <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditingId(null);
-
-                      setFormData({
-                        name: "",
-                        description: "",
-                        price: "",
-                        stock: "",
-                        vendor_id: "",
-                        productImage: null,
-                      });
-
-                      setShowModal(true);
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                    onClick={openAddModal}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition"
                 >
                   + Add Product
                 </button>
             )}
 
           </div>
+
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 mb-6">
 
-          <input
-              type="text"
-              placeholder="Search..."
-              value={filters.search}
-              onChange={(e) =>
-                  updateFilter(
-                      "search",
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
-          <select
-              value={filters.vendorId}
-              onChange={(e) =>
-                  updateFilter(
-                      "vendorId",
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          >
-            <option value="">
-              All Vendors
-            </option>
+            <input
+                type="text"
+                placeholder="Search products..."
+                value={filters.search}
+                onChange={(e) =>
+                    updateFilter(
+                        "search",
+                        e.target.value
+                    )
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
 
-            {vendors.map((vendor) => (
-                <option
-                    key={vendor.id}
-                    value={vendor.id}
-                >
-                  {vendor.name}
-                </option>
-            ))}
-          </select>
+            <select
+                value={filters.vendorId}
+                onChange={(e) =>
+                    updateFilter(
+                        "vendorId",
+                        e.target.value
+                    )
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              <option value="">
+                All Vendors
+              </option>
 
-          <input
-              type="number"
-              placeholder="Min Price"
-              value={minPriceInput}
-              onChange={(e) =>
-                  setMinPriceInput(
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          />
+              {vendors.map((vendor) => (
+                  <option
+                      key={vendor.id}
+                      value={vendor.id}
+                  >
+                    {vendor.name}
+                  </option>
+              ))}
+            </select>
 
-          <input
-              type="number"
-              placeholder="Max Price"
-              value={maxPriceInput}
-              onChange={(e) =>
-                  setMaxPriceInput(
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          />
+            <select
+                value={filters.sortBy}
+                onChange={(e) =>
+                    updateFilter(
+                        "sortBy",
+                        e.target.value
+                    )
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              <option value="name">
+                Sort by Name
+              </option>
 
-          <select
-              value={filters.sortBy}
-              onChange={(e) =>
-                  updateFilter(
-                      "sortBy",
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          >
-            <option value="name">
-              Name
-            </option>
+              <option value="price">
+                Sort by Price
+              </option>
 
-            <option value="price">
-              Price
-            </option>
+              <option value="stock">
+                Sort by Stock
+              </option>
+            </select>
 
-            <option value="stock">
-              Stock
-            </option>
-          </select>
+            <input
+                type="number"
+                placeholder="Minimum Price"
+                value={minPriceInput}
+                onChange={(e) =>
+                    setMinPriceInput(e.target.value)
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
 
-          <select
-              value={filters.order}
-              onChange={(e) =>
-                  updateFilter(
-                      "order",
-                      e.target.value
-                  )
-              }
-              className="border rounded-lg p-2"
-          >
-            <option value="ASC">
-              Ascending
-            </option>
+            <input
+                type="number"
+                placeholder="Maximum Price"
+                value={maxPriceInput}
+                onChange={(e) =>
+                    setMaxPriceInput(e.target.value)
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
 
-            <option value="DESC">
-              Descending
-            </option>
-          </select>
+            <select
+                value={filters.order}
+                onChange={(e) =>
+                    updateFilter(
+                        "order",
+                        e.target.value
+                    )
+                }
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              <option value="ASC">
+                Ascending
+              </option>
+
+              <option value="DESC">
+                Descending
+              </option>
+            </select>
+
+          </div>
 
         </div>
 
@@ -489,33 +572,33 @@ function Products() {
         />
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
+        {pagination.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
 
-          <button
-              onClick={previousPage}
-              disabled={pagination.page === 1}
-              className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Previous
-          </button>
+              <button
+                  onClick={previousPage}
+                  disabled={pagination.page === 1}
+                  className="px-5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                Previous
+              </button>
 
-          <span className="font-semibold">
-          Page {pagination.page} of{" "}
-            {pagination.totalPages}
-        </span>
+              <span className="text-sm font-medium text-slate-600">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
 
-          <button
-              onClick={nextPage}
-              disabled={
-                  pagination.page ===
-                  pagination.totalPages
-              }
-              className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
-          >
-            Next
-          </button>
+              <button
+                  onClick={nextPage}
+                  disabled={
+                      pagination.page === pagination.totalPages
+                  }
+                  className="px-5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-medium shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                Next
+              </button>
 
-        </div>
+            </div>
+        )}
 
         {/* Product Modal */}
         <ProductModal
@@ -524,11 +607,8 @@ function Products() {
             formData={formData}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
-            setFormData={setFormData}
             vendors={vendors}
             isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            setEditingId={setEditingId}
         />
 
       </div>

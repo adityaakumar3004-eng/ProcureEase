@@ -156,8 +156,8 @@ public class ProductController {
     }
 
     // ============================================================
-    // Update Product
-    // ============================================================
+// Update Product
+// ============================================================
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
@@ -174,10 +174,24 @@ public class ProductController {
             MultipartFile productImage
     ) {
 
-        String image =
-                fileStorageService.storeProductImage(
-                        productImage
-                );
+        String image = null;
+
+        // Only store image if a new file was uploaded
+        if (
+                productImage != null
+                        && !productImage.isEmpty()
+        ) {
+
+            image =
+                    fileStorageService.storeProductImage(
+                            productImage
+                    );
+
+            System.out.println(
+                    "New product image uploaded: "
+                            + image
+            );
+        }
 
         productService.updateProduct(
                 id,
@@ -189,6 +203,7 @@ public class ProductController {
                 new HashMap<>();
 
         response.put("success", true);
+
         response.put(
                 "message",
                 "Product updated successfully"
@@ -196,7 +211,6 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
-
     // ============================================================
     // Delete Product
     // ============================================================

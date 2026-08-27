@@ -1,26 +1,26 @@
 function PurchaseOrderModal({
-  showModal,
-  setShowModal,
-  formData,
-  setFormData,
-  handleVendorChange,
-  handleItemChange,
-  addItem,
-  removeItem,
-  handleSubmit,
-  vendors,
-  products,
-}) {
+                              showModal,
+                              setShowModal,
+                              formData,
+                              setFormData,
+                              handleVendorChange,
+                              handleItemChange,
+                              addItem,
+                              removeItem,
+                              handleSubmit,
+                              vendors,
+                              products,
+                            }) {
   if (!showModal) return null;
 
   const handleClose = () => {
     setShowModal(false);
 
     setFormData({
-      vendor_id: "",
+      vendorId: "",
       items: [
         {
-          product_id: "",
+          productId: "",
           quantity: "",
         },
       ],
@@ -28,198 +28,206 @@ function PurchaseOrderModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 z-50">
 
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
 
-        {/* Header */}
+          {/* Header */}
+          <div className="flex justify-between items-center px-6 py-5 border-b border-slate-200">
 
-        <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-slate-800">
+              Create Purchase Order
+            </h2>
 
-          <h2 className="text-2xl font-bold">
-            Create Purchase Order
-          </h2>
-
-          <button
-            onClick={handleClose}
-            className="text-2xl font-bold text-gray-600 hover:text-black"
-          >
-            ×
-          </button>
-
-        </div>
-
-        <form onSubmit={handleSubmit}>
-
-          {/* Vendor */}
-
-          <div className="mb-6">
-
-            <label className="block mb-2 font-medium">
-              Vendor
-            </label>
-
-            <select
-              value={formData.vendor_id}
-              onChange={handleVendorChange}
-              className="w-full border rounded-lg p-3"
-              required
+            <button
+                onClick={handleClose}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-2xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition"
             >
-
-              <option value="">
-                Select Vendor
-              </option>
-
-              {vendors.map((vendor) => (
-
-                <option
-                  key={vendor.id}
-                  value={vendor.id}
-                >
-                  {vendor.name}
-                </option>
-
-              ))}
-
-            </select>
+              ×
+            </button>
 
           </div>
 
-          {/* Products */}
+          <form
+              onSubmit={handleSubmit}
+              className="p-6"
+          >
 
-          {formData.items.map((item, index) => (
+            {/* Vendor */}
+            <div className="mb-6">
 
-            <div
-              key={index}
-              className="border rounded-lg p-4 mb-4"
-            >
+              <label className="block mb-2 text-sm font-semibold text-slate-700">
+                Vendor
+              </label>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <select
+                  value={formData.vendorId}
+                  onChange={handleVendorChange}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 bg-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                  required
+              >
 
-                {/* Product */}
+                <option value="">
+                  Select Vendor
+                </option>
 
-                <div>
+                {vendors.map((vendor) => (
 
-                  <label className="block mb-2 font-medium">
-                    Product
-                  </label>
-
-                  <select
-                    value={item.product_id}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        "product_id",
-                        e.target.value
-                      )
-                    }
-                    className="w-full border rounded-lg p-3"
-                    required
-                  >
-
-                    <option value="">
-                      Select Product
+                    <option
+                        key={vendor.id}
+                        value={vendor.id}
+                    >
+                      {vendor.name}
                     </option>
 
-                    {products.map((product) => (
+                ))}
 
-                      <option
-                        key={product.id}
-                        value={product.id}
-                      >
-                        {product.name}
-                      </option>
-
-                    ))}
-
-                  </select>
-
-                </div>
-
-                {/* Quantity */}
-
-                <div>
-
-                  <label className="block mb-2 font-medium">
-                    Quantity
-                  </label>
-
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    min="1"
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        "quantity",
-                        e.target.value
-                      )
-                    }
-                    className="w-full border rounded-lg p-3"
-                    required
-                  />
-
-                </div>
-
-              </div>
-                            <div className="flex justify-end mt-4">
-
-                {formData.items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-                  >
-                    Remove Item
-                  </button>
-                )}
-
-              </div>
+              </select>
 
             </div>
 
-          ))}
+            {/* Products */}
+            <div className="mb-5">
 
-          {/* Add Item */}
+              <h3 className="text-lg font-semibold text-slate-800">
+                Order Items
+              </h3>
 
-          <div className="mb-6">
+            </div>
 
+            {formData.items.map((item, index) => (
+
+                <div
+                    key={index}
+                    className="border border-slate-200 rounded-xl p-5 mb-4 bg-slate-50/50"
+                >
+
+                  <div className="flex items-center justify-between mb-4">
+
+                <span className="font-semibold text-slate-700">
+                  Item {index + 1}
+                </span>
+
+                    {formData.items.length > 1 && (
+
+                        <button
+                            type="button"
+                            onClick={() => removeItem(index)}
+                            className="text-sm font-medium text-red-600 hover:text-red-700 transition"
+                        >
+                          Remove
+                        </button>
+
+                    )}
+
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {/* Product */}
+                    <div>
+
+                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                        Product
+                      </label>
+
+                      <select
+                          value={item.productId}
+                          onChange={(e) =>
+                              handleItemChange(
+                                  index,
+                                  "productId",
+                                  e.target.value
+                              )
+                          }
+                          className="w-full border border-slate-300 bg-white rounded-lg px-4 py-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                          required
+                      >
+
+                        <option value="">
+                          Select Product
+                        </option>
+
+                        {products.map((product) => (
+
+                            <option
+                                key={product.id}
+                                value={product.id}
+                            >
+                              {product.name}
+                            </option>
+
+                        ))}
+
+                      </select>
+
+                    </div>
+
+                    {/* Quantity */}
+                    <div>
+
+                      <label className="block mb-2 text-sm font-medium text-slate-700">
+                        Quantity
+                      </label>
+
+                      <input
+                          type="number"
+                          value={item.quantity}
+                          min="1"
+                          placeholder="Enter quantity"
+                          onChange={(e) =>
+                              handleItemChange(
+                                  index,
+                                  "quantity",
+                                  e.target.value
+                              )
+                          }
+                          className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                          required
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+            ))}
+
+            {/* Add Item */}
             <button
-              type="button"
-              onClick={addItem}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+                type="button"
+                onClick={addItem}
+                className="mb-8 px-4 py-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition"
             >
               + Add Product
             </button>
 
-          </div>
+            {/* Footer */}
+            <div className="flex justify-end gap-3 pt-5 border-t border-slate-200">
 
-          {/* Footer */}
+              <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-medium hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
 
-          <div className="flex justify-end gap-3">
+              <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition"
+              >
+                Create Purchase Order
+              </button>
 
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-            >
-              Cancel
-            </button>
+            </div>
 
-            <button
-              type="submit"
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-            >
-              Create Purchase Order
-            </button>
+          </form>
 
-          </div>
-
-        </form>
+        </div>
 
       </div>
-
-    </div>
   );
 }
 

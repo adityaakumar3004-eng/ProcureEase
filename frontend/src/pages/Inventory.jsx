@@ -11,7 +11,12 @@ function Inventory() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
+
   const productsPerPage = 5;
+
+  // ============================================================
+  // Fetch Products
+  // ============================================================
 
   useEffect(() => {
     fetchProducts();
@@ -21,9 +26,12 @@ function Inventory() {
     try {
       setLoading(true);
 
-      const response = await getProducts();
+      const response = await getProducts({
+        page: 1,
+        limit: 100,
+      });
 
-      setProducts(response.data);
+      setProducts(response.data || []);
     } catch (error) {
       console.error("Error fetching inventory:", error);
     } finally {
@@ -52,7 +60,11 @@ function Inventory() {
   );
 
   const lowStockProducts = products.filter(
-      (product) => Number(product.stock) <= 10
+      (product) => {
+        const stock = Number(product.stock || 0);
+
+        return stock > 0 && stock <= 10;
+      }
   ).length;
 
   // ============================================================
@@ -60,16 +72,29 @@ function Inventory() {
   // ============================================================
 
   const filteredProducts = useMemo(() => {
+    const search = searchTerm
+        .toLowerCase()
+        .trim();
+
     return products.filter((product) => {
-      const search = searchTerm.toLowerCase();
+      const vendorName =
+          product.vendorName ||
+          product.vendor_name ||
+          "";
 
       return (
-          product.name.toLowerCase().includes(search) ||
-          product.vendor_name.toLowerCase().includes(search)
+          product.name
+              ?.toLowerCase()
+              .includes(search) ||
+          vendorName
+              .toLowerCase()
+              .includes(search) ||
+          String(product.id).includes(search)
       );
     });
   }, [products, searchTerm]);
 
+  // Reset page when searching
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -95,79 +120,86 @@ function Inventory() {
   );
 
   if (loading) {
-    return <h2>Loading Inventory...</h2>;
+    return (
+        <div className="p-6">
+          <h2 className="text-xl font-semibold">
+            Loading Inventory...
+          </h2>
+        </div>
+    );
   }
 
   return (
       <div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">
-            Inventory
-          </h1>
-        </div>
-
         {/* Inventory Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
 
           {/* Total Products */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <p className="text-gray-500">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+
+            <p className="text-sm text-gray-500">
               Total Products
             </p>
 
-            <h2 className="text-3xl font-bold text-blue-600 mt-2">
+            <h2 className="text-3xl font-bold text-gray-800 mt-2">
               {totalProducts}
             </h2>
+
           </div>
 
           {/* Total Stock */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <p className="text-gray-500">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+
+            <p className="text-sm text-gray-500">
               Total Stock
             </p>
 
-            <h2 className="text-3xl font-bold text-green-600 mt-2">
-              {totalStock}
+            <h2 className="text-3xl font-bold text-gray-800 mt-2">
+              {totalStock.toLocaleString()}
             </h2>
+
           </div>
 
           {/* Inventory Value */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <p className="text-gray-500">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+
+            <p className="text-sm text-gray-500">
               Inventory Value
             </p>
 
-            <h2 className="text-3xl font-bold text-purple-600 mt-2">
+            <h2 className="text-3xl font-bold text-gray-800 mt-2">
               ₹{totalInventoryValue.toLocaleString()}
             </h2>
+
           </div>
 
-          {/* Low Stock */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <p className="text-gray-500">
+          {/* Low Stock Products */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+
+            <p className="text-sm text-gray-500">
               Low Stock Products
             </p>
 
-            <h2 className="text-3xl font-bold text-red-600 mt-2">
+            <h2 className="text-3xl font-bold text-gray-800 mt-2">
               {lowStockProducts}
             </h2>
+
           </div>
 
         </div>
 
         {/* Search */}
-        <div className="mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
 
           <input
               type="text"
-              placeholder="Search products or vendors..."
+              placeholder="Search products, vendors, or ID..."
               value={searchTerm}
               onChange={(e) =>
                   setSearchTerm(e.target.value)
               }
-              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
         </div>
@@ -184,24 +216,28 @@ function Inventory() {
 
               <button
                   onClick={() =>
-                      setCurrentPage((prev) => prev - 1)
+                      setCurrentPage((prev) =>
+                          Math.max(prev - 1, 1)
+                      )
                   }
                   disabled={currentPage === 1}
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Previous
               </button>
 
-              <span className="font-semibold">
-            Page {currentPage} of {totalPages}
-          </span>
+              <span className="text-sm font-medium text-gray-600">
+                Page {currentPage} of {totalPages}
+              </span>
 
               <button
                   onClick={() =>
-                      setCurrentPage((prev) => prev + 1)
+                      setCurrentPage((prev) =>
+                          Math.min(prev + 1, totalPages)
+                      )
                   }
                   disabled={currentPage === totalPages}
-                  className="bg-gray-300 hover:bg-gray-400 disabled:opacity-50 px-4 py-2 rounded"
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Next
               </button>

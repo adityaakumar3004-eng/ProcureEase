@@ -3,27 +3,27 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
 function MainLayout() {
-  return (
-    <div className="flex min-h-screen bg-slate-100">
+    return (
+        <div className="flex min-h-screen bg-slate-50">
 
-      {/* Sidebar */}
-      <Sidebar />
+            {/* Sidebar */}
+            <Sidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+            {/* Main Area */}
+            <div className="flex min-w-0 flex-1 flex-col">
 
-        {/* Navbar */}
-        <Navbar />
+                {/* Navbar */}
+                <Navbar />
 
-        {/* Page Content */}
-        <main className="flex-1 p-6">
-          <Outlet />
-        </main>
+                {/* Page Content */}
+                <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+                    <Outlet />
+                </main>
 
-      </div>
+            </div>
 
-    </div>
-  );
+        </div>
+    );
 }
 
 export default MainLayout;

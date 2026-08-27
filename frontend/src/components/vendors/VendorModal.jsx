@@ -1,14 +1,14 @@
 function VendorModal({
-  showModal,
-  setShowModal,
-  formData,
-  handleChange,
-  handleSubmit,
-  setFormData,
-  isEditing,
-  setIsEditing,
-  setEditingId,
-}) {
+                       showModal,
+                       setShowModal,
+                       formData,
+                       handleChange,
+                       handleSubmit,
+                       setFormData,
+                       isEditing,
+                       setIsEditing,
+                       setEditingId,
+                     }) {
   if (!showModal) return null;
 
   const handleClose = () => {
@@ -25,117 +25,139 @@ function VendorModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            {isEditing ? "Edit Vendor" : "Add Vendor"}
-          </h2>
+        <div className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl">
 
-          <button
-            onClick={handleClose}
-            className="text-2xl font-bold text-gray-600 hover:text-black"
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">
+                {isEditing ? "Edit Vendor" : "Add Vendor"}
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                {isEditing
+                    ? "Update the vendor information below."
+                    : "Enter the vendor details below."}
+              </p>
+            </div>
+
+            <button
+                onClick={handleClose}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            >
+              ×
+            </button>
+
+          </div>
+
+          {/* Form */}
+          <form
+              onSubmit={handleSubmit}
+              className="space-y-5 px-6 py-6"
           >
-            ×
-          </button>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Vendor Name
+              </label>
+
+              <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Enter vendor name"
+                  required
+              />
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Email
+              </label>
+
+              <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Enter email address"
+                  required
+              />
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Phone
+              </label>
+
+              <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Enter phone number"
+                  required
+              />
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Address
+              </label>
+
+              <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full resize-none rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  rows="3"
+                  placeholder="Enter vendor address"
+                  required
+              />
+
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+
+              <button
+                  type="button"
+                  onClick={handleClose}
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
+              >
+                {isEditing
+                    ? "Update Vendor"
+                    : "Create Vendor"}
+              </button>
+
+            </div>
+
+          </form>
+
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Vendor Name
-            </label>
-
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              placeholder="Enter vendor name"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Email
-            </label>
-
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              placeholder="Enter email"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Phone
-            </label>
-
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              placeholder="Enter phone number"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Address
-            </label>
-
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              rows="3"
-              placeholder="Enter address"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-5 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              className={`px-5 py-2 text-white rounded-lg ${
-                isEditing
-                  ? "bg-yellow-500 hover:bg-yellow-600"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {isEditing ? "Update Vendor" : "Create Vendor"}
-            </button>
-
-          </div>
-
-        </form>
-
       </div>
-    </div>
   );
 }
 
