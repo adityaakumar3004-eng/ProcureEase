@@ -34,8 +34,12 @@ public class SecurityConfig {
                 // Authorization Rules
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public Auth APIs
-                        .requestMatchers("/api/auth/**")
+
+                        // Public Auth APIs + Root
+                        .requestMatchers(
+                                "/",
+                                "/api/auth/**"
+                        )
                         .permitAll()
 
                         // Product Images
