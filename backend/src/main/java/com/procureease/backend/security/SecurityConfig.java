@@ -34,8 +34,7 @@ public class SecurityConfig {
                 // Authorization Rules
                 .authorizeHttpRequests(auth -> auth
 
-
-                        // Public Auth APIs + Root
+                        // Public Root + Auth APIs
                         .requestMatchers(
                                 "/",
                                 "/api/auth/**"
